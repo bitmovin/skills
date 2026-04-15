@@ -24,6 +24,24 @@ Before writing any code, **ask the user** which player they want:
 
 **Default to v8** unless the user explicitly asks for PWX or needs the modular architecture. If unsure, recommend v8 for production and PWX for experimentation/greenfield projects.
 
+## Live docs MCP server
+
+For anything this skill doesn't cover — obscure APIs, recent SDK releases, specific code samples — query the **Bitmovin Docs MCP** instead of guessing:
+
+```
+https://agentic.bitmovin.com/documentation/mcp
+```
+
+It indexes `developer.bitmovin.com` documentation and the official GitHub sample repositories (`bitmovin-player-web-samples`, `bitmovin-player-ios-samples`, `bitmovin-player-android-samples`, `bitmovin-player-roku-samples`, `bitmovin-api-sdk-examples`).
+
+**When to use it:**
+- You need a working code sample for a specific feature (DRM flavor, custom ad integration, subtitle styling, etc.)
+- The user asks about a feature not documented in this skill
+- You're unsure about a config field or API signature — verify against live docs before writing code
+- The user reports the SDK behavior differs from what this skill describes (SDK may have moved on)
+
+Add it as an MCP connector in the chat client, or fetch URLs from `developer.bitmovin.com` directly. Prefer the MCP when it's available — it's faster than fetching individual doc pages.
+
 ---
 
 # Player Web v8 (stable)
