@@ -9,6 +9,20 @@ You are an expert at integrating the Bitmovin Web Player SDK. When the user asks
 - User needs HLS, DASH, Smooth, or DRM playback in a browser
 - User wants to customize player UI, add ads, subtitles, or analytics
 
+## IMPORTANT: Ask which player version first
+
+Before writing any code, **ask the user** which player they want:
+
+1. **Player Web v8** (`bitmovin-player`) — the stable, feature-complete SDK. Supports HLS, DASH, Smooth, DRM (Widevine/PlayReady/FairPlay), ads (VAST/VMAP/IMA), analytics, subtitles, Chromecast, AirPlay. Mature API, full documentation.
+
+2. **Player Web X / PWX** (`@bitmovin/player-web-x`) — the next-generation player built on the Phoenix Framework. Modular package-first architecture, smaller bundles, extensible via custom packages. **Still in active development — not yet feature complete.** HLS with fMP4/TS works, DASH is preliminary. DRM, ads, and some APIs are not yet implemented or are NOPs.
+
+**Default to v8** unless the user explicitly asks for PWX or needs the modular architecture. If unsure, recommend v8 for production and PWX for experimentation/greenfield projects.
+
+---
+
+# Player Web v8 (stable)
+
 ## Installation
 
 ```bash
@@ -416,7 +430,7 @@ Use these public streams for development and testing:
 | Big Buck Bunny (MP4) | `https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4` | Progressive |
 | Tears of Steel (HLS) | `https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8` | HLS |
 
-## Reference links
+## Reference links (v8)
 
 - **Player Config:** https://developer.bitmovin.com/playback/reference/web-sdk-player-config
 - **Source Config:** https://developer.bitmovin.com/playback/reference/web-sdk-source-config
@@ -424,3 +438,135 @@ Use these public streams for development and testing:
 - **Getting Started Guide:** https://developer.bitmovin.com/playback/docs/getting-started-web
 - **npm package:** https://www.npmjs.com/package/bitmovin-player
 - **GitHub samples:** https://github.com/bitmovin/bitmovin-player-web-samples
+
+---
+
+# Player Web X / PWX (next-generation)
+
+Player Web X is Bitmovin's next-generation web player built on the **Phoenix Framework** — a from-scratch architecture with structured concurrency, an effect system, and a package-first design. It is modular, extensible, and produces smaller bundles than v8.
+
+**Status:** PWX is in active development. It is **not yet feature complete**. Use v8 for production unless the user explicitly needs PWX's modular architecture.
+
+## What works in PWX today
+
+- HLS playback (fMP4 and TS segments)
+- DASH playback (preliminary)
+- Adaptive bitrate switching
+- Subtitles (WebVTT)
+- v8 API compatibility layer (partial)
+
+## What does NOT work yet in PWX
+
+- DRM (Widevine, PlayReady, FairPlay) — not implemented
+- Advertising (VAST/VMAP/IMA) — not implemented
+- Smooth Streaming — not supported
+- Some v8 API methods are NOPs (they exist but do nothing)
+- Full API documentation is preliminary
+
+## Installation
+
+```bash
+npm install @bitmovin/player-web-x
+```
+
+### CDN bundles
+
+```html
+<!-- HLS bundle (most common) -->
+<script src="https://cdn.bitmovin.com/player/web_x/10/bundles/playerx-hls.js"></script>
+
+<!-- DASH bundle (preliminary) -->
+<script src="https://cdn.bitmovin.com/player/web_x/10/bundles/playerx-dash.js"></script>
+
+<!-- v8 compatibility bundle (use v8 API with PWX engine) -->
+<script src="https://cdn.bitmovin.com/player/web_x/10/bundles/playerx-bitmovin-v8.js"></script>
+```
+
+## Basic integration (native PWX API)
+
+The PWX API is **different from v8**. Do not mix them.
+
+```typescript
+import { Player } from '@bitmovin/player-web-x';
+
+const player = Player({
+  key: 'YOUR_LICENSE_KEY',
+  defaultContainer: document.getElementById('player'),
+});
+
+// Load a source — note: uses `resources` array, not `hls`/`dash` keys
+player.sources.add({
+  resources: [{
+    url: 'https://example.com/stream.m3u8',
+  }],
+});
+```
+
+**Key API differences from v8:**
+- `Player()` is a function call, not `new Player()` constructor
+- Sources use `player.sources.add({ resources: [{ url }] })` not `player.load({ hls })`
+- Config uses `defaultContainer` not a separate container argument
+- Packages are added via `player.packages.add(...)` for modular composition
+
+## Available bundles
+
+| Bundle | Description | Use when |
+|--------|-------------|----------|
+| `playerx-hls.js` | HLS playback (TS + fMP4) | Most common use case |
+| `playerx-dash.js` | DASH playback (fMP4, preliminary) | DASH-only content |
+| `playerx-core.js` | Core only, add packages manually | Custom/minimal builds |
+| `playerx-bitmovin-v8.js` | HLS + v8 API compatibility layer | Migrating from v8 |
+| `playerx-bitmovin-v8-core.js` | Core + v8 API base compatibility | Custom v8-compat builds |
+
+## Using the v8 compatibility layer
+
+If you want to use the familiar v8 API (`new Player()`, `player.load()`, etc.) with the PWX engine:
+
+```html
+<script src="https://cdn.bitmovin.com/player/web_x/10/bundles/playerx-bitmovin-v8.js"></script>
+<script>
+  // Same API as v8!
+  const player = new bitmovin.player.Player(
+    document.getElementById('player'),
+    { key: 'YOUR_KEY' }
+  );
+  player.load({
+    hls: 'https://example.com/stream.m3u8',
+    title: 'My Video',
+  });
+</script>
+```
+
+**Caveat:** Not all v8 APIs are implemented. Some methods are NOPs pending PWX feature completion. Check the [support matrix](https://developer.bitmovin.com/playback/docs/player-web-x-support-matrix) before relying on specific features.
+
+## Custom packages
+
+PWX's killer feature is its package system. You can extend, replace, or add functionality:
+
+```typescript
+import { Player } from '@bitmovin/player-web-x';
+
+const player = Player({
+  key: 'YOUR_KEY',
+  defaultContainer: document.getElementById('player'),
+});
+
+// Add packages for the features you need
+player.packages.add(hlsPackage);
+player.packages.add(adaptationPackage);
+player.packages.add(myCustomPackage);
+```
+
+See [Creating packages](https://developer.bitmovin.com/playback/docs/player-web-x-creating-packages) for the package authoring guide.
+
+## Reference links (PWX)
+
+- **About PWX:** https://developer.bitmovin.com/playback/docs/about-player-web-x
+- **Getting Started:** https://developer.bitmovin.com/playback/docs/player-web-x-getting-started
+- **Bundles & Packages:** https://developer.bitmovin.com/playback/docs/player-web-x-bundles-packages
+- **v8 Compatibility:** https://developer.bitmovin.com/playback/docs/player-web-x-v8-compatibility
+- **Support Matrix:** https://developer.bitmovin.com/playback/docs/player-web-x-support-matrix
+- **Features:** https://developer.bitmovin.com/playback/docs/player-web-x-features
+- **Release Notes:** https://developer.bitmovin.com/playback/docs/player-web-x-release-notes
+- **API Docs (CDN):** https://cdn.bitmovin.com/player/web_x/beta/10/docs/index.html
+- **npm package:** https://www.npmjs.com/package/@bitmovin/player-web-x
