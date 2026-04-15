@@ -48,9 +48,19 @@ The package includes:
 <link rel="stylesheet" href="https://cdn.bitmovin.com/player/web/8/bitmovinplayer-ui.css" />
 ```
 
+**These are UMD bundles that attach to global namespaces — NOT ES modules.** Do not `import` from the CDN URL:
+- Player: `window.bitmovin.player.Player`
+- UI: `window.bitmovin.playerui.UIFactory`
+
+For ES module `import` syntax, install via npm and use a bundler.
+
 ### License key
 
-Every Bitmovin Player instance needs a license key. Get one from the [Bitmovin Dashboard](https://dashboard.bitmovin.com) under Player → Licenses. `localhost` is auto-allowed; deployed domains must be added to the license allowlist.
+Every Bitmovin Player instance needs a license key. `localhost` is auto-allowed; deployed domains must be added to the license allowlist.
+
+Get one of these ways:
+- **Bitmovin Dashboard**: https://dashboard.bitmovin.com → Player → Licenses
+- **Bitmovin CLI** (if installed): `bitmovin player licenses list` — lists all licenses with their keys and allowed domains. `bitmovin player licenses get <id> --json` for details.
 
 ## Basic integration
 
@@ -465,6 +475,7 @@ Player Web X is Bitmovin's next-generation web player built on the **Phoenix Fra
 - DRM (Widevine, PlayReady, FairPlay) — not implemented
 - Advertising (VAST/VMAP/IMA) — not implemented
 - Smooth Streaming — not supported
+- **Native PWX has no production-ready UI** — it renders bare HTML5 `<video>` controls. For a styled UI today, use the v8-compat bundle with `UIFactory.buildUI(player)` (see below).
 - Some v8 API methods are NOPs (they exist but do nothing)
 - Full API documentation is preliminary
 
@@ -487,31 +498,65 @@ npm install @bitmovin/player-web-x
 <script src="https://cdn.bitmovin.com/player/web_x/10/bundles/playerx-bitmovin-v8.js"></script>
 ```
 
+**These are UMD bundles — NOT ES modules.** Load via `<script src>`, not `import`. Global namespace attachments:
+
+| Bundle | Global |
+|--------|--------|
+| `playerx-hls.js`, `playerx-dash.js`, `playerx-core.js` | `window.bitmovin.playerx.Player` |
+| `playerx-bitmovin-v8.js`, `playerx-bitmovin-v8-core.js` | `window.bitmovin.player.Player` (⚠️ overwrites v8!) |
+
+For ES module `import` syntax, install via npm (`@bitmovin/player-web-x`) and use a bundler.
+
 ## Basic integration (native PWX API)
 
-The PWX API is **different from v8**. Do not mix them.
+The PWX API is **fundamentally different from v8**. Do not mix them. Minimum working example:
 
 ```typescript
 import { Player } from '@bitmovin/player-web-x';
+// CDN: const { Player } = window.bitmovin.playerx;
 
 const player = Player({
   key: 'YOUR_LICENSE_KEY',
   defaultContainer: document.getElementById('player'),
 });
 
-// Load a source — note: uses `resources` array, not `hls`/`dash` keys
-player.sources.add({
-  resources: [{
-    url: 'https://example.com/stream.m3u8',
-  }],
+// sources.add() returns a source HANDLE synchronously — it is NOT a promise.
+// Do not `await` it. The handle is where playback control lives.
+const source = player.sources.add({
+  resources: [{ url: 'https://example.com/stream.m3u8' }],
 });
+
+// Trigger playback via the source, not the player. Autoplay config is unreliable;
+// call source.play() explicitly (muted so browsers allow it).
+source.play({ isMuted: true });
+
+// Listen for first-frame / state changes on the SOURCE, not the player.
+source.events.on('playing', () => console.log('first frame rendered'));
+
+// Teardown
+player.dispose();  // NOT player.destroy() — that's a v8 name
 ```
 
-**Key API differences from v8:**
-- `Player()` is a function call, not `new Player()` constructor
-- Sources use `player.sources.add({ resources: [{ url }] })` not `player.load({ hls })`
-- Config uses `defaultContainer` not a separate container argument
-- Packages are added via `player.packages.add(...)` for modular composition
+### Critical differences from v8 — read this before coding
+
+| Concern | v8 | PWX (native) |
+|---------|----|-----|
+| Construct player | `new Player(container, config)` | `Player({ defaultContainer, ...config })` (no `new`) |
+| Load a stream | `player.load({ hls: url })` returns a Promise | `player.sources.add({ resources: [{ url }] })` returns a source handle synchronously |
+| Play / pause | `player.play()`, `player.pause()` | `source.play({ isMuted: true })`, `source.pause()` — lives on the source handle, NOT the player |
+| Subscribe to events | `player.on('playing', fn)` | `source.events.on('playing', fn)` OR `player.events.on(...)` — the player instance has no `.on()` |
+| Dispatch commands | N/A | `player.events.dispatch({ type: 'play', ... })` (event-driven architecture) |
+| Autoplay config | `playback: { autoplay: true, muted: true }` works | Config does not autoplay — must call `source.play()` |
+| Teardown | `player.destroy()` | `player.dispose()` |
+| Player instance surface | rich API: play, pause, seek, on, load, destroy, ... | minimal: `{ packages, events, sources, dispose }` |
+
+**DO NOT** call `play()` on the underlying `<video>` element to work around missing playback. That races the player's internal start flow and produces "play() request was interrupted by a new load request." Always use `source.play()`.
+
+### PWX config
+
+- `key` — license key (same as v8)
+- `defaultContainer` — DOM element to mount into (v8 passes this as a constructor arg; PWX puts it in config)
+- `playback.muted`, `playback.autoplay` — present in config, but unreliable in current PWX. Prefer explicit `source.play({ isMuted: true })`.
 
 ## Available bundles
 
@@ -525,24 +570,72 @@ player.sources.add({
 
 ## Using the v8 compatibility layer
 
-If you want to use the familiar v8 API (`new Player()`, `player.load()`, etc.) with the PWX engine:
+If you want the familiar v8 API (`new Player()`, `player.load()`, etc.) with the PWX engine:
 
 ```html
+<script src="https://cdn.bitmovin.com/player/web/8/bitmovinplayer-ui.js"></script>
 <script src="https://cdn.bitmovin.com/player/web_x/10/bundles/playerx-bitmovin-v8.js"></script>
+<link rel="stylesheet" href="https://cdn.bitmovin.com/player/web/8/bitmovinplayer-ui.css" />
 <script>
   // Same API as v8!
   const player = new bitmovin.player.Player(
     document.getElementById('player'),
-    { key: 'YOUR_KEY' }
+    { key: 'YOUR_KEY', ui: false }
   );
-  player.load({
-    hls: 'https://example.com/stream.m3u8',
-    title: 'My Video',
-  });
+  bitmovin.playerui.UIFactory.buildUI(player);  // full v8 UI works here too!
+  player.load({ hls: 'https://example.com/stream.m3u8' });
 </script>
 ```
 
+**This is currently the recommended path if you need PWX with a real UI.** The same `UIFactory.buildUI()` used with v8 works against the v8-compat bundle — giving PWX the identical styled controls (play/pause/volume/scrubber/PiP/fullscreen/settings).
+
 **Caveat:** Not all v8 APIs are implemented. Some methods are NOPs pending PWX feature completion. Check the [support matrix](https://developer.bitmovin.com/playback/docs/player-web-x-support-matrix) before relying on specific features.
+
+### Loading v8 AND PWX v8-compat on the same page
+
+Both bundles attach to `window.bitmovin.player.Player` — whichever loads second wins. To run both side-by-side (e.g. an A/B demo), capture each reference between script loads:
+
+```html
+<!-- 1) Load v8 -->
+<script src="https://cdn.bitmovin.com/player/web/8/bitmovinplayer.js"></script>
+<script src="https://cdn.bitmovin.com/player/web/8/bitmovinplayer-ui.js"></script>
+<script>
+  window.V8Player = window.bitmovin.player.Player;      // capture v8
+</script>
+
+<!-- 2) Load PWX v8-compat (this OVERWRITES window.bitmovin.player.Player) -->
+<script src="https://cdn.bitmovin.com/player/web_x/10/bundles/playerx-bitmovin-v8.js"></script>
+<script>
+  window.PwxPlayer = window.bitmovin.player.Player;     // capture PWX v8-compat
+</script>
+
+<script>
+  const v8 = new window.V8Player(v8Container, { key, ui: false });
+  const pwx = new window.PwxPlayer(pwxContainer, { key, ui: false });
+  bitmovin.playerui.UIFactory.buildUI(v8);
+  bitmovin.playerui.UIFactory.buildUI(pwx);             // same UI on both
+  v8.load({ hls: url });
+  pwx.load({ hls: url });
+</script>
+```
+
+`window.bitmovin.playerui` is a separate namespace from a separate script — it is not affected by the collision.
+
+## Measuring PWX vs v8 startup time
+
+Both v8 and the PWX v8-compat bundle emit a `'playing'` event when the first frame renders. Measure time-to-first-frame like this:
+
+```typescript
+async function measureStartup(player, source) {
+  const firstFrame = new Promise(resolve => player.on('playing', () => resolve(performance.now())));
+  const t0 = performance.now();
+  await player.load(source);
+  const t1 = await firstFrame;
+  return t1 - t0;  // startup in ms
+}
+```
+
+Run both players in parallel (so network contention is equal) or sequentially (for isolated numbers) depending on what you're benchmarking. Typical observed results on a fast connection with a small HLS stream: **PWX ~450ms, v8 ~520ms** — PWX is usually ~50-100ms faster on startup.
 
 ## Custom packages
 
