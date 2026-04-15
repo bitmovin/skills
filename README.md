@@ -1,100 +1,67 @@
-# Bitmovin Player Skill
+# Bitmovin Player Plugin for Claude Code
 
-An AI coding agent skill that teaches agents how to correctly integrate the Bitmovin Web Player SDK. Install it in your agent's skills directory and it will guide code generation for Bitmovin Player integrations — v8 or Player Web X (PWX).
-
-## What it does
-
-When a user asks an AI coding agent (Claude Code, Cursor, Codex, Goose, etc.) to add video playback with Bitmovin, this skill:
-
-1. **Asks upfront** whether to use Player v8 (stable, feature-complete) or Player Web X (next-gen, modular, WIP)
-2. **Writes correct code** — the right npm package, import paths, API calls, config shape
-3. **Covers DRM, ads, analytics, subtitles, network customization, modular builds**
-4. **Includes framework patterns** for React, Next.js (SSR-safe), and Vue
-5. **Warns about common mistakes** — the 8 integration bugs every new developer hits
-6. **Links to authoritative docs** — the correct `/playback/reference/web-sdk-*` URLs
-
-The skill is a single `SKILL.md` file — no dependencies, no build step.
+A Claude Code plugin that teaches Claude how to integrate the Bitmovin Web Player SDK — both **Player v8** (stable) and **Player Web X / PWX** (next-gen). Install it once and Claude always knows how to build Bitmovin Player integrations correctly.
 
 ## Install
 
-### Claude Code
-
 ```bash
-git clone https://github.com/bitmovin/bitmovin-player-skill.git
-cp -r bitmovin-player-skill ~/.claude/skills/bitmovin-player
+# Add the Bitmovin marketplace
+/plugin marketplace add bitmovin/bitmovin-player-skill
+
+# Install the plugin
+/plugin install bitmovin-player@bitmovin
 ```
 
-Or for a single project:
+After install, the skill loads in every Claude Code session automatically. No further config.
 
-```bash
-mkdir -p .claude/skills
-cp -r bitmovin-player-skill .claude/skills/bitmovin-player
-```
+Verify with *"What skills do you have access to?"* — `bitmovin-player` should appear.
 
-Verify with: *"What skills do you have access to?"* — `bitmovin-player` should appear.
+## What it does
 
-### Other agents
+When you ask Claude to add video playback with Bitmovin, the skill:
 
-Copy the skill directory into the agent's skills folder:
+1. **Asks upfront** whether to use Player v8 (feature-complete) or Player Web X (modular, WIP)
+2. **Writes correct code** — right npm package, right import paths, right API calls
+3. **Covers DRM, ads, analytics, subtitles, network customization**
+4. **Uses framework patterns** for React, Next.js (SSR-safe), and Vue
+5. **Warns about common mistakes** — the 8 most frequent integration bugs
+6. **Links to authoritative docs** — the correct `/playback/reference/web-sdk-*` URLs
 
-| Agent | Skills directory |
-|-------|------------------|
-| Claude Code | `~/.claude/skills/` |
-| VS Code / GitHub Copilot | `~/.copilot/skills/` |
-| Gemini CLI | `~/.gemini/skills/` |
-| Cline | `~/.cline/skills/` |
-| Goose | `~/.config/goose/skills/` |
-| Codex | `~/.codex/skills/` |
-| Cursor | `~/.cursor/skills/` |
+## Why this exists
 
-### Vercel Skills CLI (cross-agent)
+LLMs have stale or confused Bitmovin Player knowledge. Common failures without this plugin:
 
-```bash
-npx skills add bitmovin/bitmovin-player-skill
-```
+- Wrong npm package (`@bitmovin/player` — doesn't exist, it's `bitmovin-player`)
+- Wrong UIFactory method (`buildDefaultUI` instead of `buildUI`)
+- Missing `ui: false` config → double controls
+- No SSR guard on Next.js imports → crash
+- Outdated doc URLs (`/playback/docs/*` instead of `/playback/reference/*`)
+- Mixing v8 and PWX APIs in the same code
+
+This plugin encodes the right answers once so every Claude session avoids them.
 
 ## What's covered
 
 ### Player v8 (stable)
 
-- Installation (npm + CDN), license keys, localhost auto-allow
-- Basic integration with `UIFactory.buildUI()` pattern
-- Source config: HLS, DASH, Smooth, progressive, subtitles, thumbnails, poster
-- Player config reference (all top-level fields)
-- Player API reference (load, play, pause, seek, events, quality, destroy)
-- DRM: Widevine, PlayReady, FairPlay with cross-browser setup
-- Advertising: VAST/VMAP pre/mid/post-roll
-- Analytics integration
-- Network customization: `preprocessHttpRequest` + full `sendHttpRequest` replacement
-- Framework patterns: React, Next.js (dynamic import for SSR), Vue
-- Modular builds for smaller bundles
-- Common mistakes and their fixes
-- Public test streams
+Installation, license keys, basic integration with `UIFactory.buildUI()`, source config (HLS/DASH/Smooth/progressive), subtitles, thumbnails, poster, DRM (Widevine/PlayReady/FairPlay), ads (VAST/VMAP), analytics, network customization (`preprocessHttpRequest` + `sendHttpRequest`), React/Next.js/Vue patterns, modular builds, test streams, and full API references.
 
 ### Player Web X / PWX (next-gen)
 
-- Native PWX API (`Player({key, defaultContainer})` + `player.sources.add()`)
-- CDN bundles: `hls`, `dash`, `core`, `bitmovin-v8` (compat)
-- v8 compatibility layer for drop-in migration
-- Custom packages system
-- Current feature gaps (no DRM, no ads, partial DASH, some NOP APIs)
+Native PWX API (`Player({key, defaultContainer})` + `player.sources.add()`), CDN bundles (`hls`, `dash`, `core`, `bitmovin-v8` compat), v8 compatibility layer for drop-in migration, custom packages system, and current feature gaps (no DRM, no ads, partial DASH, some NOP APIs).
 
-## Why this exists
+## Use outside Claude Code
 
-LLMs have stale or confused Bitmovin Player knowledge. Common failure modes without this skill:
+The skill file is a plain markdown — it also works when copied into other agent skill directories (Cursor, Copilot, Codex, Goose, Gemini CLI, Cline). The plugin/marketplace layer is Claude-Code-specific, but the skill content itself is portable.
 
-- Wrong npm package (`@bitmovin/player` — doesn't exist, it's `bitmovin-player`)
-- Wrong UIFactory method (`buildDefaultUI` instead of `buildUI`)
-- Missing `ui: false` config causing double controls
-- No SSR guard on Next.js imports
-- Outdated doc URLs (`/playback/docs/*` instead of `/playback/reference/*`)
-- Mixing v8 and PWX APIs in the same code
-
-This skill encodes the right answers once so every agent using it avoids them.
+```bash
+# Example: for Cursor
+cp skills/bitmovin-player/SKILL.md ~/.cursor/skills/bitmovin-player/
+```
 
 ## Contributing
 
-The skill is a single markdown file. Update `SKILL.md`, open a PR. Keep instructions concrete — include code examples for every claim, link to primary sources (developer.bitmovin.com), and explicitly call out common mistakes.
+The skill is a single markdown file at `skills/bitmovin-player/SKILL.md`. Update it, bump the version in `.claude-plugin/plugin.json` and `.claude-plugin/marketplace.json`, open a PR. Keep instructions concrete: code examples for every claim, primary-source links, and explicit "common mistakes" sections.
 
 ## License
 
