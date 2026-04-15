@@ -1,7 +1,7 @@
 {
   "name": "bitmovin-player",
   "description": "Teach Claude how to integrate the Bitmovin Web Player SDK (v8 and Player Web X). Covers installation, DRM, ads, analytics, subtitles, React/Next.js/Vue patterns, and common pitfalls.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": {
     "name": "Bitmovin"
   },

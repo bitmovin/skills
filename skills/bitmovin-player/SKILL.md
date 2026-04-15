@@ -14,15 +14,20 @@ You are an expert at integrating the Bitmovin Web Player SDK. When the user asks
 - User needs HLS, DASH, Smooth, or DRM playback in a browser
 - User wants to customize player UI, add ads, subtitles, or analytics
 
-## IMPORTANT: Ask which player version first
+## Choose the player version deliberately
 
-Before writing any code, **ask the user** which player they want:
+**Default to Player Web v8** unless the user explicitly asks for PWX, is evaluating PWX, or the architecture tradeoff matters.
 
-1. **Player Web v8** (`bitmovin-player`) — the stable, feature-complete SDK. Supports HLS, DASH, Smooth, DRM (Widevine/PlayReady/FairPlay), ads (VAST/VMAP/IMA), analytics, subtitles, Chromecast, AirPlay. Mature API, full documentation.
+Only ask which player they want when the answer changes the implementation, for example:
+- The user mentions PWX, Player Web X, bundles, or custom packages
+- The user wants to benchmark or compare v8 vs PWX
+- The user is migrating an existing PWX proof of concept
 
-2. **Player Web X / PWX** (`@bitmovin/player-web-x`) — the next-generation player built on the Phoenix Framework. Modular package-first architecture, smaller bundles, extensible via custom packages. **Still in active development — not yet feature complete.** HLS with fMP4/TS works, DASH is preliminary. DRM, ads, and some APIs are not yet implemented or are NOPs.
+Recommended options:
 
-**Default to v8** unless the user explicitly asks for PWX or needs the modular architecture. If unsure, recommend v8 for production and PWX for experimentation/greenfield projects.
+1. **Player Web v8** (`bitmovin-player`) — the stable production default. Supports HLS, DASH, Smooth, DRM (Widevine/PlayReady/FairPlay), ads (VAST/VMAP/IMA), analytics, subtitles, Chromecast, AirPlay. Mature API, full documentation.
+
+2. **Player Web X / PWX** (`@bitmovin/player-web-x`) — the next-generation modular player. Still evolving and feature-incomplete. Use when the user explicitly wants PWX, wants the package architecture, or is validating PWX-specific behavior.
 
 ## Live docs MCP server
 
@@ -52,11 +57,13 @@ Add it as an MCP connector in the chat client, or fetch URLs from `developer.bit
 npm install bitmovin-player
 ```
 
-The package includes:
-- `bitmovin-player` — core player + all modules (2.2MB)
-- `bitmovin-player/bitmovinplayer-ui` — default UI module
-- `bitmovin-player/bitmovinplayer-ui.css` — UI stylesheet
-- TypeScript types in `bitmovin-player/types/`
+For explicit UI customization or version pinning, also install the dedicated UI package:
+
+```bash
+npm install bitmovin-player-ui
+```
+
+The main package includes the player runtime and TypeScript types. The dedicated `bitmovin-player-ui` package ships the UI assets and type declarations for explicit UI work.
 
 ### CDN alternative
 
@@ -84,8 +91,6 @@ Get one of these ways:
 
 ```typescript
 import { Player } from 'bitmovin-player';
-import { UIFactory } from 'bitmovin-player/bitmovinplayer-ui';
-import 'bitmovin-player/bitmovinplayer-ui.css';
 
 const container = document.getElementById('player');
 
@@ -95,11 +100,7 @@ const player = new Player(container, {
     autoplay: false,
     muted: false,
   },
-  ui: false, // disable built-in UI, we use UIFactory instead
 });
-
-// Attach the default UI
-UIFactory.buildUI(player);
 
 // Load a source
 await player.load({
@@ -109,23 +110,48 @@ await player.load({
 });
 ```
 
-### Important: the UI module
+### UI guidance for current v8 releases
 
-The Bitmovin Player UI is a **separate module**. The pattern is:
-1. Set `ui: false` in the player config (disables the legacy built-in UI)
-2. Import `UIFactory` from `bitmovin-player/bitmovinplayer-ui`
-3. Call `UIFactory.buildUI(player)` after creating the player
+**Last verified:** 2026-04-15 against Bitmovin Web release notes and UI v4 docs.
 
-If you skip step 2-3, the player renders video but shows no controls.
+For new Web SDK integrations on current v8 releases, **do not assume you must wire `UIFactory` manually**. Since Web `8.245.0` (released 2026-02-09), Bitmovin's default Web UI integration migrated to UI v4 and standard setups can use the default UI without extra wiring.
 
-**TypeScript note:** The UI module has no bundled type declarations. Add a shim:
+Use the explicit UI package only when you need one of these:
+- Pin a specific UI version
+- Customize the UI build process
+- Stay on an older player version where you still initialize the UI manually
+- Build a non-default UI variant intentionally
+
+### Explicit or custom UI integration
+
+For explicit UI wiring, prefer the dedicated `bitmovin-player-ui` package because it ships type declarations.
+
 ```typescript
-// types/bitmovin-player-ui.d.ts
-declare module 'bitmovin-player/bitmovinplayer-ui' {
-  export const UIFactory: any;
-}
-declare module 'bitmovin-player/bitmovinplayer-ui.css';
+import { Player } from 'bitmovin-player';
+import { UIFactory } from 'bitmovin-player-ui';
+import 'bitmovin-player-ui/dist/css/bitmovinplayer-ui.css';
+
+const player = new Player(document.getElementById('player'), {
+  key: 'YOUR_LICENSE_KEY',
+  ui: false,
+});
+
+UIFactory.buildUI(player);
 ```
+
+When you want to pin the hosted UI assets explicitly, configure them through `PlayerConfig.location`:
+
+```typescript
+const player = new Player(document.getElementById('player'), {
+  key: 'YOUR_LICENSE_KEY',
+  location: {
+    ui: 'https://cdn.jsdelivr.net/npm/bitmovin-player-ui@4/dist/js/bitmovinplayer-ui.js',
+    ui_css: 'https://cdn.jsdelivr.net/npm/bitmovin-player-ui@4/dist/css/bitmovinplayer-ui.css',
+  },
+});
+```
+
+If you set `ui: false`, you are responsible for attaching a UI yourself.
 
 ## Source configuration
 
@@ -346,35 +372,51 @@ network: {
 ```tsx
 import { useEffect, useRef } from 'react';
 import { Player } from 'bitmovin-player';
-import { UIFactory } from 'bitmovin-player/bitmovinplayer-ui';
-import 'bitmovin-player/bitmovinplayer-ui.css';
 
 function BitmovinPlayer({ source, licenseKey }) {
-  const containerRef = useRef(null);
-  const playerRef = useRef(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const playerRef = useRef<Player | null>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
 
     const player = new Player(containerRef.current, {
       key: licenseKey,
-      ui: false,
     });
-    UIFactory.buildUI(player);
-    player.load(source);
     playerRef.current = player;
 
     return () => {
-      player.destroy();
+      playerRef.current?.destroy();
       playerRef.current = null;
     };
-  }, [source.hls || source.dash || source.progressive]);
+  }, [licenseKey]);
+
+  useEffect(() => {
+    const player = playerRef.current;
+    if (!player) return;
+
+    let cancelled = false;
+
+    (async () => {
+      try {
+        await player.load(source);
+      } catch (error) {
+        if (!cancelled) {
+          console.error('Bitmovin load failed', error);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [source]);
 
   return <div ref={containerRef} />;
 }
 ```
 
-**Important:** The player modifies the container DOM. Always `destroy()` on unmount. Use a stable key/ref to avoid unnecessary re-mounts.
+**Important:** Create the player once, then load new sources separately. Do not key the effect off `source.hls || source.dash || source.progressive` because that misses other source changes such as DRM, subtitles, poster, start offset, or analytics metadata.
 
 ### Next.js
 
@@ -396,16 +438,13 @@ const BitmovinPlayer = dynamic(() => import('./BitmovinPlayer'), { ssr: false })
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
 import { Player } from 'bitmovin-player';
-import { UIFactory } from 'bitmovin-player/bitmovinplayer-ui';
-import 'bitmovin-player/bitmovinplayer-ui.css';
 
 const container = ref(null);
 let player = null;
 
-onMounted(() => {
-  player = new Player(container.value, { key: 'YOUR_KEY', ui: false });
-  UIFactory.buildUI(player);
-  player.load({ hls: 'https://example.com/stream.m3u8' });
+onMounted(async () => {
+  player = new Player(container.value, { key: 'YOUR_KEY' });
+  await player.load({ hls: 'https://example.com/stream.m3u8' });
 });
 
 onUnmounted(() => player?.destroy());
@@ -414,17 +453,17 @@ onUnmounted(() => player?.destroy());
 
 ## Common mistakes
 
-1. **Forgetting `ui: false`** — If you use `UIFactory.buildUI()`, set `ui: false` in the config. Otherwise you get double controls.
+1. **Assuming manual `UIFactory.buildUI()` is required on every v8 integration** — On current Web SDK releases, standard setups can use the default UI integration without manual wiring.
 
-2. **Not destroying on unmount** — The player creates DOM elements and event listeners. Always call `player.destroy()` when removing the player.
+2. **Disabling the UI without attaching one** — If you set `ui: false`, the player will not create a default UI for you.
 
-3. **Autoplay without muted** — Browsers block unmuted autoplay. Set `playback: { autoplay: true, muted: true }` or handle the play() promise rejection.
+3. **Not destroying on unmount** — The player creates DOM elements and event listeners. Always call `player.destroy()` when removing the player.
 
-4. **SSR importing** — The player SDK accesses `window` and `document` at import time. Always use dynamic imports with `ssr: false` in Next.js/Nuxt.
+4. **Autoplay without muted** — Browsers block unmuted autoplay. Set `playback: { autoplay: true, muted: true }` or handle the `play()` promise rejection.
 
-5. **Missing UI stylesheet** — Import `bitmovin-player/bitmovinplayer-ui.css` or the controls render unstyled.
+5. **SSR importing** — The player SDK accesses `window` and `document` at import time. Always use dynamic imports with `ssr: false` in Next.js/Nuxt.
 
-6. **Wrong UIFactory method** — It's `UIFactory.buildUI(player)`, not `buildDefaultUI`.
+6. **Missing explicit UI assets when pinning or customizing the UI** — If you override `location.ui` / `location.ui_css` or wire the UI package manually, load the matching JS and CSS assets together.
 
 7. **Loading multiple sources without awaiting** — `player.load()` returns a promise. Await it before calling `load()` again or querying state.
 
@@ -469,7 +508,10 @@ Use these public streams for development and testing:
 - **Source Config:** https://developer.bitmovin.com/playback/reference/web-sdk-source-config
 - **Player API:** https://developer.bitmovin.com/playback/reference/web-sdk-player-api
 - **Getting Started Guide:** https://developer.bitmovin.com/playback/docs/getting-started-web
+- **Web Release Notes:** https://developer.bitmovin.com/playback/docs/release-notes-web
+- **What's New in UI v4:** https://developer.bitmovin.com/playback/docs/whats-new-in-ui-v4
 - **npm package:** https://www.npmjs.com/package/bitmovin-player
+- **UI package:** https://www.npmjs.com/package/bitmovin-player-ui
 - **GitHub samples:** https://github.com/bitmovin/bitmovin-player-web-samples
 
 ---
@@ -478,24 +520,29 @@ Use these public streams for development and testing:
 
 Player Web X is Bitmovin's next-generation web player built on the **Phoenix Framework** — a from-scratch architecture with structured concurrency, an effect system, and a package-first design. It is modular, extensible, and produces smaller bundles than v8.
 
-**Status:** PWX is in active development. It is **not yet feature complete**. Use v8 for production unless the user explicitly needs PWX's modular architecture.
+**Last verified:** 2026-04-15 against the PWX getting started guide, v8 compatibility guide, support matrix, and package docs.
+
+**Status:** PWX is in active development and its capability surface is volatile. Use v8 for production by default unless the user explicitly needs PWX's package architecture or is validating PWX itself.
 
 ## What works in PWX today
 
-- HLS playback (fMP4 and TS segments)
-- DASH playback (preliminary)
-- Adaptive bitrate switching
-- Subtitles (WebVTT)
+- HLS playback
+- DASH playback (partially supported)
+- Sources API / multi-source workflows
+- Load control and view mode packages
+- WebVTT subtitles
+- Optional analytics package support
 - v8 API compatibility layer (partial)
 
 ## What does NOT work yet in PWX
 
-- DRM (Widevine, PlayReady, FairPlay) — not implemented
-- Advertising (VAST/VMAP/IMA) — not implemented
+- DRM and advertising are still incomplete enough that you should verify the live docs before promising them
 - Smooth Streaming — not supported
-- **Native PWX has no production-ready UI** — it renders bare HTML5 `<video>` controls. For a styled UI today, use the v8-compat bundle with `UIFactory.buildUI(player)` (see below).
-- Some v8 API methods are NOPs (they exist but do nothing)
-- Full API documentation is preliminary
+- Progressive playback — not supported
+- WebRTC — not supported
+- Network API support is currently marked unsupported in the official support matrix
+- Quality and playback APIs are still marked `Next` in the official support matrix
+- Some v8 compatibility APIs are NOPs
 
 ## Installation
 
@@ -530,7 +577,7 @@ For ES module `import` syntax, install via npm (`@bitmovin/player-web-x`) and us
 The PWX API is **fundamentally different from v8**. Do not mix them. Minimum working example:
 
 ```typescript
-import { Player } from '@bitmovin/player-web-x';
+import { Player } from '@bitmovin/player-web-x/bundles/playerx-hls';
 // CDN: const { Player } = window.bitmovin.playerx;
 
 const player = Player({
@@ -591,23 +638,27 @@ player.dispose();  // NOT player.destroy() — that's a v8 name
 If you want the familiar v8 API (`new Player()`, `player.load()`, etc.) with the PWX engine:
 
 ```html
-<script src="https://cdn.bitmovin.com/player/web/8/bitmovinplayer-ui.js"></script>
 <script src="https://cdn.bitmovin.com/player/web_x/10/bundles/playerx-bitmovin-v8.js"></script>
-<link rel="stylesheet" href="https://cdn.bitmovin.com/player/web/8/bitmovinplayer-ui.css" />
 <script>
   // Same API as v8!
   const player = new bitmovin.player.Player(
     document.getElementById('player'),
-    { key: 'YOUR_KEY', ui: false }
+    {
+      key: 'YOUR_KEY',
+      playback: { autoplay: true, muted: true },
+      location: {
+        ui: 'https://cdn.bitmovin.com/player/web/8/bitmovinplayer-ui.js',
+        ui_css: 'https://cdn.bitmovin.com/player/web/8/bitmovinplayer-ui.css',
+      },
+    }
   );
-  bitmovin.playerui.UIFactory.buildUI(player);  // full v8 UI works here too!
   player.load({ hls: 'https://example.com/stream.m3u8' });
 </script>
 ```
 
-**This is currently the recommended path if you need PWX with a real UI.** The same `UIFactory.buildUI()` used with v8 works against the v8-compat bundle — giving PWX the identical styled controls (play/pause/volume/scrubber/PiP/fullscreen/settings).
+This mirrors the current official v8-compat documentation more closely than manually calling `UIFactory.buildUI()`. Prefer the documented `location.ui` / `location.ui_css` path unless you have a specific reason to own the UI bootstrap yourself.
 
-**Caveat:** Not all v8 APIs are implemented. Some methods are NOPs pending PWX feature completion. Check the [support matrix](https://developer.bitmovin.com/playback/docs/player-web-x-support-matrix) before relying on specific features.
+**Caveat:** Not all v8 APIs are implemented. Some methods are NOPs pending PWX feature completion. Check the live [support matrix](https://developer.bitmovin.com/playback/docs/player-web-x-support-matrix) before relying on specific features.
 
 ### Loading v8 AND PWX v8-compat on the same page
 
@@ -653,7 +704,7 @@ async function measureStartup(player, source) {
 }
 ```
 
-Run both players in parallel (so network contention is equal) or sequentially (for isolated numbers) depending on what you're benchmarking. Typical observed results on a fast connection with a small HLS stream: **PWX ~450ms, v8 ~520ms** — PWX is usually ~50-100ms faster on startup.
+Run both players in parallel (so network contention is equal) or sequentially (for isolated numbers) depending on what you're benchmarking. Do **not** hardcode an expected delta into your guidance: startup results vary significantly by browser, device, stream packaging, cache state, and SDK version.
 
 ## Custom packages
 
