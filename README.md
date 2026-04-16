@@ -93,7 +93,7 @@ The local Codex marketplace entry should point at:
 - `.claude-plugin/plugin.json`: Claude Code plugin metadata
 - `.claude-plugin/marketplace.json`: Claude marketplace metadata
 - `plugins/bitmovin-player/.codex-plugin/plugin.json`: Codex plugin metadata
-- `plugins/bitmovin-player/skills/bitmovin-player/SKILL.md`: Codex plugin copy of the shared skill
+- `plugins/bitmovin-player/skills/bitmovin-player/SKILL.md`: symlink to the shared root skill
 - `.agents/plugins/marketplace.json`: Codex marketplace metadata
 
 ## What it does
@@ -142,6 +142,8 @@ The source of truth is `skills/bitmovin-player/SKILL.md`. Keep it portable acros
 - `plugins/bitmovin-player/.codex-plugin/plugin.json`
 - `plugins/bitmovin-player/skills/bitmovin-player/SKILL.md`
 - `.agents/plugins/marketplace.json`
+
+The Codex plugin skill path is intentionally a symlink back to `skills/bitmovin-player/SKILL.md` so the repo only has one canonical skill payload.
 
 Keep instructions concrete: code examples for every claim, primary-source links, and explicit "common mistakes" sections.
 
