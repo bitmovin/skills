@@ -5,10 +5,10 @@
   },
   "plugins": [
     {
-      "name": "bitmovin-player",
+      "name": "bitmovin-player-web",
       "source": {
         "source": "local",
-        "path": "./plugins/bitmovin-player"
+        "path": "./plugins/bitmovin-player-web"
       },
       "policy": {
         "installation": "AVAILABLE",

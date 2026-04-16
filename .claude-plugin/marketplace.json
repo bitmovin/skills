@@ -5,10 +5,10 @@
   },
   "plugins": [
     {
-      "name": "bitmovin-player",
+      "name": "bitmovin-player-web",
       "source": "./",
-      "description": "Bitmovin Web Player SDK integration skill for Claude Code (v8 and Player Web X).",
-      "version": "0.3.0"
+      "description": "Bitmovin Player Web SDK integration skill for Claude Code (v8 and Player Web X).",
+      "version": "0.4.0"
     }
   ]
 }

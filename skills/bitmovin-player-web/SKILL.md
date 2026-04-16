@@ -1,5 +1,5 @@
 ---
-name: bitmovin-player
+name: bitmovin-player-web
 description: Integrate the Bitmovin Web Player SDK into a web app. Use when the user asks to add video playback, embed a player, play HLS/DASH/MP4, set up DRM (Widevine/PlayReady/FairPlay), integrate ads, or work with the Bitmovin Player in any way. Covers both Player v8 (stable) and Player Web X / PWX (next-gen).
 ---
 

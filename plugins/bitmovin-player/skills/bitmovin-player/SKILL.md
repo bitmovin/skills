@@ -1,1 +1,0 @@
-../../../../skills/bitmovin-player/SKILL.md
