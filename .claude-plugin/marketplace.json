@@ -8,7 +8,7 @@
       "name": "bitmovin-player",
       "source": "./",
       "description": "Bitmovin Web Player SDK integration skill for Claude Code (v8 and Player Web X).",
-      "version": "0.2.0"
+      "version": "0.3.0"
     }
   ]
 }

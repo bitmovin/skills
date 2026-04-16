@@ -1,0 +1,42 @@
+{
+  "name": "bitmovin-player",
+  "version": "0.3.0",
+  "description": "Portable Bitmovin Web Player integration skill packaged for Codex as a local plugin.",
+  "author": {
+    "name": "Bitmovin",
+    "url": "https://github.com/bitmovin/bitmovin-player-skill"
+  },
+  "homepage": "https://github.com/bitmovin/bitmovin-player-skill",
+  "repository": "https://github.com/bitmovin/bitmovin-player-skill",
+  "license": "MIT",
+  "keywords": [
+    "bitmovin",
+    "video",
+    "streaming",
+    "hls",
+    "dash",
+    "drm",
+    "web-player",
+    "codex-plugin"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Bitmovin Player",
+    "shortDescription": "Integrate Bitmovin Player v8 or PWX correctly in web apps",
+    "longDescription": "Adds a reusable Bitmovin Web Player workflow to Codex, covering current v8 guidance, PWX tradeoffs, DRM, ads, analytics, subtitles, network hooks, and framework integration patterns.",
+    "developerName": "Bitmovin",
+    "category": "Coding",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/bitmovin/bitmovin-player-skill",
+    "defaultPrompt": [
+      "Add Bitmovin Player to this web app",
+      "Integrate DRM playback with Bitmovin Player",
+      "Compare Bitmovin v8 and Player Web X for this project"
+    ],
+    "brandColor": "#1730E7"
+  }
+}
