@@ -1,11 +1,11 @@
 ---
 name: bitmovin-player-web
-description: Integrate the Bitmovin Web Player SDK into a web app. Use when the user asks to add video playback, embed a player, play HLS/DASH/MP4/WHEP/MOQ, set up DRM (Widevine/PlayReady/FairPlay), integrate ads, or work with the Bitmovin Player in any way. Covers both Player v8 (stable) and Player Web X / PWX (next-gen).
+description: Integrate the Bitmovin Web Player SDK into a web app. Use when the user asks to add video playback, embed a player, play HLS/DASH/MP4/WHEP/MOQ, set up DRM (Widevine/PlayReady/FairPlay), integrate ads, customize the Player UI, or work with the Bitmovin Player in any way. Covers both Player v8 (stable) and Player Web X / PWX (next-gen).
 ---
 
 # Bitmovin Web Player Integration Skill
 
-You are an expert at integrating the Bitmovin Web Player SDK. When the user asks you to add video playback, embed a player, integrate streaming, or work with the Bitmovin Player — use this skill.
+You are an expert at integrating the Bitmovin Web Player SDK. When the user asks you to add video playback, embed a player, integrate streaming, customize the Player UI, or work with the Bitmovin Player — use this skill.
 
 ## When to activate
 
@@ -25,7 +25,7 @@ Only ask which player they want when the answer changes the implementation, for 
 
 Recommended options:
 
-1. **Player Web v8** (`bitmovin-player`) — the stable production default. Supports HLS, DASH, Smooth, WHEP, DRM (Widevine/PlayReady/FairPlay), ads (VAST/VMAP/IMA), analytics, subtitles, Chromecast, AirPlay. Mature API, full documentation.
+1. **Player Web v8** (`bitmovin-player`) — the stable production default. Supports HLS, DASH, Smooth, WHEP, DRM (Widevine/PlayReady/FairPlay), ads (VAST/VMAP/IMA), analytics, subtitles, Chromecast, AirPlay, and is the primary choice for Web Player and Player UI integrations. Mature API, full documentation.
 
 2. **Player Web X / PWX** (`@bitmovin/player-web-x`) — the next-generation modular player. Still evolving and feature-incomplete. Use when the user explicitly wants PWX, wants the package architecture, or is validating PWX-specific behavior. MOQ playback is currently in this version rather than v8.
 
@@ -455,19 +455,21 @@ onUnmounted(() => player?.destroy());
 
 1. **Assuming manual `UIFactory.buildUI()` is required on every v8 integration** — On current Web SDK releases, standard setups can use the default UI integration without manual wiring.
 
-2. **Disabling the UI without attaching one** — If you set `ui: false`, the player will not create a default UI for you.
+2. **Using `UIFactory` or `UIManager` directly without disabling built-in UI handling** — If you wire the UI yourself, set `ui: false` in the player config so the player does not also try to manage the default UI.
 
-3. **Not destroying on unmount** — The player creates DOM elements and event listeners. Always call `player.destroy()` when removing the player.
+3. **Disabling the UI without attaching one** — If you set `ui: false`, the player will not create a default UI for you.
 
-4. **Autoplay without muted** — Browsers block unmuted autoplay. Set `playback: { autoplay: true, muted: true }` or handle the `play()` promise rejection.
+4. **Not destroying on unmount** — The player creates DOM elements and event listeners. Always call `player.destroy()` when removing the player.
 
-5. **SSR importing** — The player SDK accesses `window` and `document` at import time. Always use dynamic imports with `ssr: false` in Next.js/Nuxt.
+5. **Autoplay without muted** — Browsers block unmuted autoplay. Set `playback: { autoplay: true, muted: true }` or handle the `play()` promise rejection.
 
-6. **Missing explicit UI assets when pinning or customizing the UI** — If you override `location.ui` / `location.ui_css` or wire the UI package manually, load the matching JS and CSS assets together.
+6. **SSR importing** — The player SDK accesses `window` and `document` at import time. Always use dynamic imports with `ssr: false` in Next.js/Nuxt.
 
-7. **Loading multiple sources without awaiting** — `player.load()` returns a promise. Await it before calling `load()` again or querying state.
+7. **Missing explicit UI assets when pinning or customizing the UI** — If you override `location.ui` / `location.ui_css` or wire the UI package manually, load the matching JS and CSS assets together.
 
-8. **Hardcoding the license key** — Use environment variables. The key is exposed to the browser (client-side SDK) but shouldn't be in source control.
+8. **Loading multiple sources without awaiting** — `player.load()` returns a promise. Await it before calling `load()` again or querying state.
+
+9. **Hardcoding the license key** — Use environment variables. The key is exposed to the browser (client-side SDK) but shouldn't be in source control.
 
 ## Modular builds
 
