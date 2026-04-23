@@ -157,7 +157,7 @@ If you set `ui: false`, you are responsible for attaching a UI yourself.
 
 The source object tells the player what to play. At least one of `hls`, `dash`, `smooth`, or `progressive` is required.
 
-**API reference:** https://developer.bitmovin.com/playback/reference/web-sdk-source-config
+**API reference:** https://developer.bitmovin.com/playback/reference/web-sdk-source-config.md
 
 ```typescript
 await player.load({
@@ -187,7 +187,7 @@ await player.load({
 
 The config object passed to `new Player(container, config)`.
 
-**API reference:** https://developer.bitmovin.com/playback/reference/web-sdk-player-config
+**API reference:** https://developer.bitmovin.com/playback/reference/web-sdk-player-config.md
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -204,7 +204,7 @@ The config object passed to `new Player(container, config)`.
 
 ## Player API
 
-**API reference:** https://developer.bitmovin.com/playback/reference/web-sdk-player-api
+**API reference:** https://developer.bitmovin.com/playback/reference/web-sdk-player-api.md
 
 ```typescript
 // Playback control
@@ -504,9 +504,9 @@ Use these public streams for development and testing:
 
 ## Reference links (v8)
 
-- **Player Config:** https://developer.bitmovin.com/playback/reference/web-sdk-player-config
-- **Source Config:** https://developer.bitmovin.com/playback/reference/web-sdk-source-config
-- **Player API:** https://developer.bitmovin.com/playback/reference/web-sdk-player-api
+- **Player Config:** https://developer.bitmovin.com/playback/reference/web-sdk-player-config.md
+- **Source Config:** https://developer.bitmovin.com/playback/reference/web-sdk-source-config.md
+- **Player API:** https://developer.bitmovin.com/playback/reference/web-sdk-player-api.md
 - **Getting Started Guide:** https://developer.bitmovin.com/playback/docs/getting-started-web
 - **Web Release Notes:** https://developer.bitmovin.com/playback/docs/release-notes-web
 - **What's New in UI v4:** https://developer.bitmovin.com/playback/docs/whats-new-in-ui-v4
