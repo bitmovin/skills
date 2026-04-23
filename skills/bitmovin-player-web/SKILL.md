@@ -271,6 +271,10 @@ await player.load({
 
 Supports VAST, VMAP, and IMA SDK integration.
 
+At minimum, configure `advertising: {}` if you want ad support enabled up front but plan to schedule ads dynamically later via `player.ads.schedule(...)`.
+
+By default, the Google IMA SDK is used for ad playback. That is often the best choice when Google Ad Manager / Google Ad Server is involved because it unlocks capabilities such as programmatic demand and ActiveView measurement. If you integrate with non-Google ad servers, consider switching to the Bitmovin Advertising Module (BAM) by importing `bitmovin-player/modules/bitmovinplayer-advertising-bitmovin.js` and registering that module with the player. BAM can be preferable when you want Bitmovin's full ads UI and ads UI customization options.
+
 ```typescript
 const player = new Player(container, {
   key: 'YOUR_KEY',
@@ -282,7 +286,7 @@ const player = new Player(container, {
       },
       {
         tag: { url: 'https://example.com/vast-midroll.xml', type: 'vast' },
-        position: '50%',  // midroll at 50%
+        position: '50%',  // midroll at 50%; other supported formats include time-based values like '90'
       },
       {
         tag: { url: 'https://example.com/vast-postroll.xml', type: 'vast' },
@@ -301,6 +305,8 @@ advertising: {
   ],
 }
 ```
+
+For mid-rolls, `position` supports multiple string formats, not just percentages. Common examples include percentage-based values such as `'50%'`, time-based values such as `'90'` for 1m30s, and other formats documented here: https://developer.bitmovin.com/playback/reference/web-sdk-advertising#position
 
 ## Analytics
 
