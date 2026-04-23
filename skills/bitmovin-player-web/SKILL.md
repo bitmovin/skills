@@ -502,6 +502,10 @@ This gives you HLS playback at ~1.2MB instead of 2.2MB. Add `DashModule`, `DrmMo
 
 If you use a modular build at all — meaning you import at least `Player` from `bitmovin-player/modules/bitmovinplayer-core` — then do **not** import anything from `bitmovin-player` directly anywhere in that bundle. Keep all Bitmovin player imports on the `bitmovin-player/modules/*` path. Mixing modular imports with `bitmovin-player` can cause both the modular modules and the full player build to end up in the application bundle, defeating the bundle-size benefit.
 
+## TVs & gaming consoles
+
+When targeting TV or console platforms, check whether Bitmovin provides platform-specific modules and add them explicitly where needed. Some platform integrations are not part of the generic full player build and are expected to be included separately for the relevant target platform. Examples include Samsung Tizen TVs, LG webOS TVs, and PlayStation 5. If the user is building for one of these environments, verify the required platform module set before proposing the final integration.
+
 ## Test streams
 
 Use these public streams for development and testing:
