@@ -479,6 +479,8 @@ onUnmounted(() => player?.destroy());
 
 ## Modular builds
 
+Reference: https://developer.bitmovin.com/playback/reference/web-sdk-modules.md
+
 For smaller bundles, import only the modules you need:
 
 ```typescript
@@ -497,6 +499,8 @@ import PolyfillModule from 'bitmovin-player/modules/bitmovinplayer-polyfill';
 ```
 
 This gives you HLS playback at ~1.2MB instead of 2.2MB. Add `DashModule`, `DrmModule`, etc. as needed.
+
+If you use a modular build at all — meaning you import at least `Player` from `bitmovin-player/modules/bitmovinplayer-core` — then do **not** import anything from `bitmovin-player` directly anywhere in that bundle. Keep all Bitmovin player imports on the `bitmovin-player/modules/*` path. Mixing modular imports with `bitmovin-player` can cause both the modular modules and the full player build to end up in the application bundle, defeating the bundle-size benefit.
 
 ## Test streams
 
