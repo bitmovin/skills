@@ -12,7 +12,7 @@ You are an expert at integrating the Bitmovin Web Player SDK. When the user asks
 - User asks to add video playback to a web app
 - User mentions Bitmovin Player, `bitmovin-player`, or streaming integration
 - User needs HLS, DASH, Smooth, WHEP, MOQ, or DRM playback in a browser
-- User wants to customize player UI, add ads, subtitles, or analytics
+- User wants to customize player UI, add ads, subtitles, analytics, or other player integrations
 
 ## Choose the player version deliberately
 
@@ -25,7 +25,7 @@ Only ask which player they want when the answer changes the implementation, for 
 
 Recommended options:
 
-1. **Player Web v8** (`bitmovin-player`) — the stable production default. Supports HLS, DASH, Smooth, WHEP, DRM (Widevine/PlayReady/FairPlay), ads (VAST/VMAP/IMA), analytics, subtitles, Chromecast, AirPlay, and is the primary choice for Web Player and Player UI integrations. Mature API, full documentation.
+1. **Player Web v8** (`bitmovin-player`) — the stable production default. Supports HLS, DASH, Smooth, WHEP, DRM (Widevine/PlayReady/FairPlay), ads (VAST/VMAP/IMA), analytics, subtitles, Chromecast, AirPlay, and is the primary choice for Web Player and Player UI integrations. It also supports a range of 3rd-party integrations such as Yospace SSAI and Conviva Analytics. Mature API, full documentation.
 
 2. **Player Web X / PWX** (`@bitmovin/player-web-x`) — the next-generation modular player. Still evolving and feature-incomplete. Use when the user explicitly wants PWX, wants the package architecture, or is validating PWX-specific behavior. MOQ playback is currently in this version rather than v8.
 
