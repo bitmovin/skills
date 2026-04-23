@@ -68,9 +68,9 @@ The main package includes the player runtime and TypeScript types. The dedicated
 ### CDN alternative
 
 ```html
-<script src="https://cdn.bitmovin.com/player/web/8/bitmovinplayer.js"></script>
-<script src="https://cdn.bitmovin.com/player/web/8/bitmovinplayer-ui.js"></script>
-<link rel="stylesheet" href="https://cdn.bitmovin.com/player/web/8/bitmovinplayer-ui.css" />
+<script src="https://cdn.jsdelivr.net/npm/bitmovin-player@8/bitmovinplayer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bitmovin-player-ui@4/dist/js/bitmovinplayer-ui.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bitmovin-player-ui@4/dist/css/bitmovinplayer-ui.css" />
 ```
 
 **These are UMD bundles that attach to global namespaces — NOT ES modules.** Do not `import` from the CDN URL:
@@ -554,13 +554,13 @@ npm install @bitmovin/player-web-x
 
 ```html
 <!-- HLS bundle (most common) -->
-<script src="https://cdn.bitmovin.com/player/web_x/10/bundles/playerx-hls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@bitmovin/player-web-x@10/bundles/playerx-hls.js"></script>
 
 <!-- DASH bundle (preliminary) -->
-<script src="https://cdn.bitmovin.com/player/web_x/10/bundles/playerx-dash.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@bitmovin/player-web-x@10/bundles/playerx-dash.js"></script>
 
 <!-- v8 compatibility bundle (use v8 API with PWX engine) -->
-<script src="https://cdn.bitmovin.com/player/web_x/10/bundles/playerx-bitmovin-v8.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@bitmovin/player-web-x@10/bundles/playerx-bitmovin-v8.js"></script>
 ```
 
 **These are UMD bundles — NOT ES modules.** Load via `<script src>`, not `import`. Global namespace attachments:
@@ -638,7 +638,7 @@ player.dispose();  // NOT player.destroy() — that's a v8 name
 If you want the familiar v8 API (`new Player()`, `player.load()`, etc.) with the PWX engine:
 
 ```html
-<script src="https://cdn.bitmovin.com/player/web_x/10/bundles/playerx-bitmovin-v8.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@bitmovin/player-web-x@10/bundles/playerx-bitmovin-v8.js"></script>
 <script>
   // Same API as v8!
   const player = new bitmovin.player.Player(
@@ -647,8 +647,8 @@ If you want the familiar v8 API (`new Player()`, `player.load()`, etc.) with the
       key: 'YOUR_KEY',
       playback: { autoplay: true, muted: true },
       location: {
-        ui: 'https://cdn.bitmovin.com/player/web/8/bitmovinplayer-ui.js',
-        ui_css: 'https://cdn.bitmovin.com/player/web/8/bitmovinplayer-ui.css',
+        ui: 'https://cdn.jsdelivr.net/npm/bitmovin-player-ui@4/dist/js/bitmovinplayer-ui.js',
+        ui_css: 'https://cdn.jsdelivr.net/npm/bitmovin-player-ui@4/dist/css/bitmovinplayer-ui.css',
       },
     }
   );
@@ -666,14 +666,14 @@ Both bundles attach to `window.bitmovin.player.Player` — whichever loads secon
 
 ```html
 <!-- 1) Load v8 -->
-<script src="https://cdn.bitmovin.com/player/web/8/bitmovinplayer.js"></script>
-<script src="https://cdn.bitmovin.com/player/web/8/bitmovinplayer-ui.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bitmovin-player@8/bitmovinplayer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bitmovin-player-ui@4/dist/js/bitmovinplayer-ui.js"></script>
 <script>
   window.V8Player = window.bitmovin.player.Player;      // capture v8
 </script>
 
 <!-- 2) Load PWX v8-compat (this OVERWRITES window.bitmovin.player.Player) -->
-<script src="https://cdn.bitmovin.com/player/web_x/10/bundles/playerx-bitmovin-v8.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@bitmovin/player-web-x@10/bundles/playerx-bitmovin-v8.js"></script>
 <script>
   window.PwxPlayer = window.bitmovin.player.Player;     // capture PWX v8-compat
 </script>
