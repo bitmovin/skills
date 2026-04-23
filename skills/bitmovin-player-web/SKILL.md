@@ -1,6 +1,6 @@
 ---
 name: bitmovin-player-web
-description: Integrate the Bitmovin Web Player SDK into a web app. Use when the user asks to add video playback, embed a player, play HLS/DASH/MP4, set up DRM (Widevine/PlayReady/FairPlay), integrate ads, or work with the Bitmovin Player in any way. Covers both Player v8 (stable) and Player Web X / PWX (next-gen).
+description: Integrate the Bitmovin Web Player SDK into a web app. Use when the user asks to add video playback, embed a player, play HLS/DASH/MP4/WHEP/MOQ, set up DRM (Widevine/PlayReady/FairPlay), integrate ads, or work with the Bitmovin Player in any way. Covers both Player v8 (stable) and Player Web X / PWX (next-gen).
 ---
 
 # Bitmovin Web Player Integration Skill
@@ -11,7 +11,7 @@ You are an expert at integrating the Bitmovin Web Player SDK. When the user asks
 
 - User asks to add video playback to a web app
 - User mentions Bitmovin Player, `bitmovin-player`, or streaming integration
-- User needs HLS, DASH, Smooth, or DRM playback in a browser
+- User needs HLS, DASH, Smooth, WHEP, MOQ, or DRM playback in a browser
 - User wants to customize player UI, add ads, subtitles, or analytics
 
 ## Choose the player version deliberately
@@ -25,9 +25,9 @@ Only ask which player they want when the answer changes the implementation, for 
 
 Recommended options:
 
-1. **Player Web v8** (`bitmovin-player`) — the stable production default. Supports HLS, DASH, Smooth, DRM (Widevine/PlayReady/FairPlay), ads (VAST/VMAP/IMA), analytics, subtitles, Chromecast, AirPlay. Mature API, full documentation.
+1. **Player Web v8** (`bitmovin-player`) — the stable production default. Supports HLS, DASH, Smooth, WHEP, DRM (Widevine/PlayReady/FairPlay), ads (VAST/VMAP/IMA), analytics, subtitles, Chromecast, AirPlay. Mature API, full documentation.
 
-2. **Player Web X / PWX** (`@bitmovin/player-web-x`) — the next-generation modular player. Still evolving and feature-incomplete. Use when the user explicitly wants PWX, wants the package architecture, or is validating PWX-specific behavior.
+2. **Player Web X / PWX** (`@bitmovin/player-web-x`) — the next-generation modular player. Still evolving and feature-incomplete. Use when the user explicitly wants PWX, wants the package architecture, or is validating PWX-specific behavior. MOQ playback is currently in this version rather than v8.
 
 ## Live docs MCP server
 
