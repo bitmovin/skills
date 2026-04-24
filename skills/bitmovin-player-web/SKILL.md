@@ -1,18 +1,18 @@
 ---
 name: bitmovin-player-web
-description: Integrate the Bitmovin Web Player SDK into a web app. Use when the user asks to add video playback, embed a player, play HLS/DASH/MP4, set up DRM (Widevine/PlayReady/FairPlay), integrate ads, or work with the Bitmovin Player in any way. Covers both Player v8 (stable) and Player Web X / PWX (next-gen).
+description: Integrate the Bitmovin Web Player SDK into a web app. Use when the user asks to add video playback, embed a player, play HLS/DASH/MP4/WHEP/MOQ, set up DRM (Widevine/PlayReady/FairPlay), integrate ads, customize the Player UI, or work with the Bitmovin Player in any way. Covers both Player v8 (stable) and Player Web X / PWX (next-gen).
 ---
 
 # Bitmovin Web Player Integration Skill
 
-You are an expert at integrating the Bitmovin Web Player SDK. When the user asks you to add video playback, embed a player, integrate streaming, or work with the Bitmovin Player — use this skill.
+You are an expert at integrating the Bitmovin Web Player SDK. When the user asks you to add video playback, embed a player, integrate streaming, customize the Player UI, or work with the Bitmovin Player — use this skill.
 
 ## When to activate
 
 - User asks to add video playback to a web app
 - User mentions Bitmovin Player, `bitmovin-player`, or streaming integration
-- User needs HLS, DASH, Smooth, or DRM playback in a browser
-- User wants to customize player UI, add ads, subtitles, or analytics
+- User needs HLS, DASH, Smooth, WHEP, MOQ, or DRM playback in a browser
+- User wants to customize player UI, add ads, subtitles, analytics, or other player integrations
 
 ## Choose the player version deliberately
 
@@ -25,9 +25,9 @@ Only ask which player they want when the answer changes the implementation, for 
 
 Recommended options:
 
-1. **Player Web v8** (`bitmovin-player`) — the stable production default. Supports HLS, DASH, Smooth, DRM (Widevine/PlayReady/FairPlay), ads (VAST/VMAP/IMA), analytics, subtitles, Chromecast, AirPlay. Mature API, full documentation.
+1. **Player Web v8** (`bitmovin-player`) — the stable production default. Supports HLS, DASH, Smooth, WHEP, DRM (Widevine/PlayReady/FairPlay), ads (VAST/VMAP/IMA), analytics, subtitles, Chromecast, AirPlay, and is the primary choice for Web Player and Player UI integrations. It also supports a range of 3rd-party integrations such as Yospace SSAI and Conviva Analytics. Mature API, full documentation.
 
-2. **Player Web X / PWX** (`@bitmovin/player-web-x`) — the next-generation modular player. Still evolving and feature-incomplete. Use when the user explicitly wants PWX, wants the package architecture, or is validating PWX-specific behavior.
+2. **Player Web X / PWX** (`@bitmovin/player-web-x`) — the next-generation modular player. Still evolving and feature-incomplete. Use when the user explicitly wants PWX, wants the package architecture, or is validating PWX-specific behavior. MOQ playback is currently in this version rather than v8.
 
 ## Live docs MCP server
 
@@ -68,9 +68,9 @@ The main package includes the player runtime and TypeScript types. The dedicated
 ### CDN alternative
 
 ```html
-<script src="https://cdn.bitmovin.com/player/web/8/bitmovinplayer.js"></script>
-<script src="https://cdn.bitmovin.com/player/web/8/bitmovinplayer-ui.js"></script>
-<link rel="stylesheet" href="https://cdn.bitmovin.com/player/web/8/bitmovinplayer-ui.css" />
+<script src="https://cdn.jsdelivr.net/npm/bitmovin-player@8/bitmovinplayer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bitmovin-player-ui@4/dist/js/bitmovinplayer-ui.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bitmovin-player-ui@4/dist/css/bitmovinplayer-ui.css" />
 ```
 
 **These are UMD bundles that attach to global namespaces — NOT ES modules.** Do not `import` from the CDN URL:
@@ -157,7 +157,7 @@ If you set `ui: false`, you are responsible for attaching a UI yourself.
 
 The source object tells the player what to play. At least one of `hls`, `dash`, `smooth`, or `progressive` is required.
 
-**API reference:** https://developer.bitmovin.com/playback/reference/web-sdk-source-config
+**API reference:** https://developer.bitmovin.com/playback/reference/web-sdk-source-config.md
 
 ```typescript
 await player.load({
@@ -187,7 +187,7 @@ await player.load({
 
 The config object passed to `new Player(container, config)`.
 
-**API reference:** https://developer.bitmovin.com/playback/reference/web-sdk-player-config
+**API reference:** https://developer.bitmovin.com/playback/reference/web-sdk-player-config.md
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -204,7 +204,7 @@ The config object passed to `new Player(container, config)`.
 
 ## Player API
 
-**API reference:** https://developer.bitmovin.com/playback/reference/web-sdk-player-api
+**API reference:** https://developer.bitmovin.com/playback/reference/web-sdk-player-api.md
 
 ```typescript
 // Playback control
@@ -271,6 +271,10 @@ await player.load({
 
 Supports VAST, VMAP, and IMA SDK integration.
 
+At minimum, configure `advertising: {}` if you want ad support enabled up front but plan to schedule ads dynamically later via `player.ads.schedule(...)`.
+
+By default, the Google IMA SDK is used for ad playback. That is often the best choice when Google Ad Manager / Google Ad Server is involved because it unlocks capabilities such as programmatic demand and ActiveView measurement. If you integrate with non-Google ad servers, consider switching to the Bitmovin Advertising Module (BAM) by importing `bitmovin-player/modules/bitmovinplayer-advertising-bitmovin.js` and registering that module with the player. BAM can be preferable when you want Bitmovin's full ads UI and ads UI customization options.
+
 ```typescript
 const player = new Player(container, {
   key: 'YOUR_KEY',
@@ -282,7 +286,7 @@ const player = new Player(container, {
       },
       {
         tag: { url: 'https://example.com/vast-midroll.xml', type: 'vast' },
-        position: '50%',  // midroll at 50%
+        position: '50%',  // midroll at 50%; other supported formats include time-based values like '90'
       },
       {
         tag: { url: 'https://example.com/vast-postroll.xml', type: 'vast' },
@@ -301,6 +305,8 @@ advertising: {
   ],
 }
 ```
+
+For mid-rolls, `position` supports multiple string formats, not just percentages. Common examples include percentage-based values such as `'50%'`, time-based values such as `'90'` for 1m30s, and other formats documented here: https://developer.bitmovin.com/playback/reference/web-sdk-advertising#position
 
 ## Analytics
 
@@ -455,21 +461,25 @@ onUnmounted(() => player?.destroy());
 
 1. **Assuming manual `UIFactory.buildUI()` is required on every v8 integration** — On current Web SDK releases, standard setups can use the default UI integration without manual wiring.
 
-2. **Disabling the UI without attaching one** — If you set `ui: false`, the player will not create a default UI for you.
+2. **Using `UIFactory` or `UIManager` directly without disabling built-in UI handling** — If you wire the UI yourself, set `ui: false` in the player config so the player does not also try to manage the default UI.
 
-3. **Not destroying on unmount** — The player creates DOM elements and event listeners. Always call `player.destroy()` when removing the player.
+3. **Disabling the UI without attaching one** — If you set `ui: false`, the player will not create a default UI for you.
 
-4. **Autoplay without muted** — Browsers block unmuted autoplay. Set `playback: { autoplay: true, muted: true }` or handle the `play()` promise rejection.
+4. **Not destroying on unmount** — The player creates DOM elements and event listeners. Always call `player.destroy()` when removing the player.
 
-5. **SSR importing** — The player SDK accesses `window` and `document` at import time. Always use dynamic imports with `ssr: false` in Next.js/Nuxt.
+5. **Autoplay without muted** — Browsers block unmuted autoplay. Set `playback: { autoplay: true, muted: true }` or handle the `play()` promise rejection.
 
-6. **Missing explicit UI assets when pinning or customizing the UI** — If you override `location.ui` / `location.ui_css` or wire the UI package manually, load the matching JS and CSS assets together.
+6. **SSR importing** — The player SDK accesses `window` and `document` at import time. Always use dynamic imports with `ssr: false` in Next.js/Nuxt.
 
-7. **Loading multiple sources without awaiting** — `player.load()` returns a promise. Await it before calling `load()` again or querying state.
+7. **Missing explicit UI assets when pinning or customizing the UI** — If you override `location.ui` / `location.ui_css` or wire the UI package manually, load the matching JS and CSS assets together.
 
-8. **Hardcoding the license key** — Use environment variables. The key is exposed to the browser (client-side SDK) but shouldn't be in source control.
+8. **Loading multiple sources without awaiting** — `player.load()` returns a promise. Await it before calling `load()` again or querying state.
+
+9. **Hardcoding the license key** — Use environment variables. The key is exposed to the browser (client-side SDK) but shouldn't be in source control.
 
 ## Modular builds
+
+Reference: https://developer.bitmovin.com/playback/reference/web-sdk-modules.md
 
 For smaller bundles, import only the modules you need:
 
@@ -490,6 +500,12 @@ import PolyfillModule from 'bitmovin-player/modules/bitmovinplayer-polyfill';
 
 This gives you HLS playback at ~1.2MB instead of 2.2MB. Add `DashModule`, `DrmModule`, etc. as needed.
 
+If you use a modular build at all — meaning you import at least `Player` from `bitmovin-player/modules/bitmovinplayer-core` — then do **not** import anything from `bitmovin-player` directly anywhere in that bundle. Keep all Bitmovin player imports on the `bitmovin-player/modules/*` path. Mixing modular imports with `bitmovin-player` can cause both the modular modules and the full player build to end up in the application bundle, defeating the bundle-size benefit.
+
+## TVs & gaming consoles
+
+When targeting TV or console platforms, check whether Bitmovin provides platform-specific modules and add them explicitly where needed. Some platform integrations are not part of the generic full player build and are expected to be included separately for the relevant target platform. Examples include Samsung Tizen TVs, LG webOS TVs, and PlayStation 5. If the user is building for one of these environments, verify the required platform module set before proposing the final integration.
+
 ## Test streams
 
 Use these public streams for development and testing:
@@ -504,9 +520,9 @@ Use these public streams for development and testing:
 
 ## Reference links (v8)
 
-- **Player Config:** https://developer.bitmovin.com/playback/reference/web-sdk-player-config
-- **Source Config:** https://developer.bitmovin.com/playback/reference/web-sdk-source-config
-- **Player API:** https://developer.bitmovin.com/playback/reference/web-sdk-player-api
+- **Player Config:** https://developer.bitmovin.com/playback/reference/web-sdk-player-config.md
+- **Source Config:** https://developer.bitmovin.com/playback/reference/web-sdk-source-config.md
+- **Player API:** https://developer.bitmovin.com/playback/reference/web-sdk-player-api.md
 - **Getting Started Guide:** https://developer.bitmovin.com/playback/docs/getting-started-web
 - **Web Release Notes:** https://developer.bitmovin.com/playback/docs/release-notes-web
 - **What's New in UI v4:** https://developer.bitmovin.com/playback/docs/whats-new-in-ui-v4
@@ -554,13 +570,13 @@ npm install @bitmovin/player-web-x
 
 ```html
 <!-- HLS bundle (most common) -->
-<script src="https://cdn.bitmovin.com/player/web_x/10/bundles/playerx-hls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@bitmovin/player-web-x@10/bundles/playerx-hls.js"></script>
 
 <!-- DASH bundle (preliminary) -->
-<script src="https://cdn.bitmovin.com/player/web_x/10/bundles/playerx-dash.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@bitmovin/player-web-x@10/bundles/playerx-dash.js"></script>
 
 <!-- v8 compatibility bundle (use v8 API with PWX engine) -->
-<script src="https://cdn.bitmovin.com/player/web_x/10/bundles/playerx-bitmovin-v8.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@bitmovin/player-web-x@10/bundles/playerx-bitmovin-v8.js"></script>
 ```
 
 **These are UMD bundles — NOT ES modules.** Load via `<script src>`, not `import`. Global namespace attachments:
@@ -638,7 +654,7 @@ player.dispose();  // NOT player.destroy() — that's a v8 name
 If you want the familiar v8 API (`new Player()`, `player.load()`, etc.) with the PWX engine:
 
 ```html
-<script src="https://cdn.bitmovin.com/player/web_x/10/bundles/playerx-bitmovin-v8.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@bitmovin/player-web-x@10/bundles/playerx-bitmovin-v8.js"></script>
 <script>
   // Same API as v8!
   const player = new bitmovin.player.Player(
@@ -647,8 +663,8 @@ If you want the familiar v8 API (`new Player()`, `player.load()`, etc.) with the
       key: 'YOUR_KEY',
       playback: { autoplay: true, muted: true },
       location: {
-        ui: 'https://cdn.bitmovin.com/player/web/8/bitmovinplayer-ui.js',
-        ui_css: 'https://cdn.bitmovin.com/player/web/8/bitmovinplayer-ui.css',
+        ui: 'https://cdn.jsdelivr.net/npm/bitmovin-player-ui@4/dist/js/bitmovinplayer-ui.js',
+        ui_css: 'https://cdn.jsdelivr.net/npm/bitmovin-player-ui@4/dist/css/bitmovinplayer-ui.css',
       },
     }
   );
@@ -666,14 +682,14 @@ Both bundles attach to `window.bitmovin.player.Player` — whichever loads secon
 
 ```html
 <!-- 1) Load v8 -->
-<script src="https://cdn.bitmovin.com/player/web/8/bitmovinplayer.js"></script>
-<script src="https://cdn.bitmovin.com/player/web/8/bitmovinplayer-ui.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bitmovin-player@8/bitmovinplayer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bitmovin-player-ui@4/dist/js/bitmovinplayer-ui.js"></script>
 <script>
   window.V8Player = window.bitmovin.player.Player;      // capture v8
 </script>
 
 <!-- 2) Load PWX v8-compat (this OVERWRITES window.bitmovin.player.Player) -->
-<script src="https://cdn.bitmovin.com/player/web_x/10/bundles/playerx-bitmovin-v8.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@bitmovin/player-web-x@10/bundles/playerx-bitmovin-v8.js"></script>
 <script>
   window.PwxPlayer = window.bitmovin.player.Player;     // capture PWX v8-compat
 </script>
