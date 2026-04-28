@@ -186,7 +186,11 @@ After integration changes, verify each applicable capability:
    - TV UI variant and remote-control flow work
 
 5. **Log-based diagnostics**
-   - Add/confirm targeted playback logs around source resolution, fallback decisions, and session transitions.
+   - For SDK debug logs, set `DebugConfig.isLoggingEnabled = true` (**before** creating any `Player`, `Source`, or `PlayerView`).
+   - Prefer setting it once in `Application.onCreate` when troubleshooting.
+   - SDK debug output is emitted through `android.util.Log`.
+   - Use this mainly for troubleshooting/bug reports; requires Bitmovin Player Android SDK `>= 3.93.0`.
+   - Add/confirm targeted app playback logs around source resolution, fallback decisions, and session transitions.
 
 6. **Source-switch performance**
    - Verify source transitions are smooth and avoid unnecessary player recreation.
