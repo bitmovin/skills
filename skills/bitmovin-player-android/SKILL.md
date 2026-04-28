@@ -42,6 +42,25 @@ Use this skill when the task involves any of the following in an Android app:
 4. **Keep playback path unified across device classes**
    - Reuse one player pipeline; vary UI/UX by form factor (e.g., TV vs small screen).
 
+5. **Prefer Playlist API when switching sources**
+   - For source transitions (next/previous/channel-style flows), prefer the Bitmovin Playlist API over repeated ad-hoc source reload patterns.
+
+6. **Reuse player instances for performance**
+   - Keep player instances long-lived for a playback scope when possible.
+   - Avoid unnecessary player destruction/recreation during normal source changes.
+
+7. **Treat configs as immutable where possible**
+   - Treat player/source/playback configs as immutable after creation.
+   - When behavior changes are needed, create new config objects instead of mutating existing instances.
+
+8. **Use `+jason` Bitmovin dependencies when ExoPlayer/Media3 is also used**
+   - If the app also depends on ExoPlayer/Media3 directly, use Bitmovin `+jason` flavor dependencies consistently.
+   - Keep Bitmovin modules version-aligned and flavor-aligned.
+
+9. **Assume `Player` API is main-thread-only unless docs explicitly state otherwise**
+   - Access `Player` APIs from the main thread by default.
+   - Allow off-main usage only for APIs the official docs explicitly mark as safe.
+
 ## Integration workflow
 
 ### 1) Validate setup from docs
@@ -100,6 +119,36 @@ Prefer Bitmovin handler wiring over fully custom PiP/fullscreen implementation:
 - Switch Bitmovin Web UI variant by form factor (TV vs small-screen variant).
 - Ensure TV discoverability and launcher behavior are configured when targeting Android TV.
 
+### 9) Source switching strategy (Playlist-first)
+
+- For frequent source changes (episodes/channels/next-previous flows), prefer the Bitmovin Playlist API.
+- Avoid full player teardown for normal transitions.
+- Use one-off source loading directly only when playlist behavior is not needed.
+
+### 10) Player lifecycle for performance
+
+- Reuse one player per playback scope where feasible.
+- Rebind view/UI to the reused player instead of recreating the player instance.
+- Destroy the player only when the playback context is truly finished.
+
+### 11) Config immutability pattern
+
+- Build configs in a construct-once/apply-once style where possible.
+- On behavior changes, create fresh config instances and apply deliberately.
+- Avoid mutating shared config instances after they are handed to SDK components.
+
+### 12) Dependency flavor policy
+
+- If ExoPlayer/Media3 is present in the app, use Bitmovin `+jason` flavor dependencies.
+- Keep all Bitmovin modules aligned to the same flavor/version line.
+- Check dependency graph consistency before merge.
+
+### 13) Threading discipline
+
+- Run I/O and parsing on background dispatchers.
+- Marshal back to main thread before calling `Player` APIs.
+- Assume `Player` APIs are main-thread-only unless the official docs explicitly state otherwise.
+
 ## Common pitfalls to avoid
 
 - Using outdated repository/dependency coordinates
@@ -108,6 +157,10 @@ Prefer Bitmovin handler wiring over fully custom PiP/fullscreen implementation:
 - Forcing explicit source type when `fromUrl(...)` is better suited
 - Re-implementing PiP/fullscreen behavior that Bitmovin handlers already provide
 - Decoupling media session lifecycle from player lifecycle
+- Recreating players for routine source switches instead of using playlist/reuse patterns
+- Mutating config objects in-place after SDK handoff
+- Mixing `+jason` and non-`+jason` Bitmovin artifacts in the same integration
+- Calling `Player` APIs off-main without explicit documentation support
 
 ## Verification checklist (Bitmovin-focused)
 
@@ -131,6 +184,17 @@ After integration changes, verify each applicable capability:
 
 5. **Log-based diagnostics**
    - Add/confirm targeted playback logs around source resolution, fallback decisions, and session transitions.
+
+6. **Source-switch performance**
+   - Verify source transitions are smooth and avoid unnecessary player recreation.
+
+7. **Dependency graph health**
+   - Verify Bitmovin modules are flavor/version aligned.
+   - If ExoPlayer/Media3 is present, verify Bitmovin uses `+jason` flavor artifacts consistently.
+
+8. **Main-thread API usage**
+   - Verify `Player` API access happens on main thread by default.
+   - Allow exceptions only where official docs explicitly state off-main safety.
 
 ## Response behavior while executing
 
