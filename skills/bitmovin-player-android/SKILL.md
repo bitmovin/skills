@@ -11,6 +11,10 @@ Use this documentation as the authoritative reference for API behavior, class na
 
 **https://cdn.bitmovin.com/player/android/md/3/index.md**
 
+Use this samples repository as the implementation companion reference (patterns, wiring examples, end-to-end app setups):
+
+**https://github.com/bitmovin/bitmovin-player-android-samples**
+
 If examples, cached artifacts, old snippets, or prior assumptions conflict with the docs, follow the docs.
 
 ## When to use this skill
@@ -90,8 +94,8 @@ Build player config explicitly and keep it centralized:
 
 ### 4) Source loading strategy
 
-- Prefer `SourceConfig.fromUrl(...)` when source auto-detection is supported and appropriate.
-- Avoid hardcoding source type unless there is a concrete need.
+- Prefer hardcoding source types when the stream type is known.
+- Use `SourceConfig.fromUrl(...)` when source auto-detection is needed or the source type is unknown.
 - For multi-URL playback candidates (e.g., HLS/DASH alternatives), implement deterministic fallback behavior.
 
 ### 5) PiP/fullscreen via Bitmovin handlers
@@ -152,9 +156,8 @@ Prefer Bitmovin handler wiring over fully custom PiP/fullscreen implementation:
 ## Common pitfalls to avoid
 
 - Using outdated repository/dependency coordinates
-- Building first-time dependency resolution with `--offline`
 - Calling documented properties as functions (or vice versa)
-- Forcing explicit source type when `fromUrl(...)` is better suited
+- Relying on source auto-detection when the source type is known and should be explicit
 - Re-implementing PiP/fullscreen behavior that Bitmovin handlers already provide
 - Decoupling media session lifecycle from player lifecycle
 - Recreating players for routine source switches instead of using playlist/reuse patterns
