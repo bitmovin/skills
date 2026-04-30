@@ -4,10 +4,10 @@
   "description": "Portable Bitmovin Web Player integration skill packaged for Codex as a local plugin.",
   "author": {
     "name": "Bitmovin",
-    "url": "https://github.com/bitmovin/bitmovin-player-skill"
+    "url": "https://github.com/bitmovin/skills"
   },
-  "homepage": "https://github.com/bitmovin/bitmovin-player-skill",
-  "repository": "https://github.com/bitmovin/bitmovin-player-skill",
+  "homepage": "https://github.com/bitmovin/skills",
+  "repository": "https://github.com/bitmovin/skills",
   "license": "MIT",
   "keywords": [
     "bitmovin",
@@ -31,7 +31,7 @@
       "Read",
       "Write"
     ],
-    "websiteURL": "https://github.com/bitmovin/bitmovin-player-skill",
+    "websiteURL": "https://github.com/bitmovin/skills",
     "defaultPrompt": [
       "Add Bitmovin Player Web to this web app",
       "Integrate DRM playback with Bitmovin Player Web",
