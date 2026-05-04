@@ -19,6 +19,11 @@ TERMINAL_BAD = {"ERROR", "CANCELED", "FINISHED"}
 DASHBOARD_URL = "https://dashboard.bitmovin.com/live/encodings/{eid}"
 STATIC_RTMP_HOST = "live-ingest.bitmovin.com"
 STATIC_RTMP_APPLICATION = "live"
+# Input types whose ingest credentials are not exposed via `live.get`:
+# - srt:           no user-facing stream key at all.
+# - redundantRtmp: stream keys live on static ingest points and are listed
+#                  via `api.encoding.live.stream_keys.list` instead.
+INPUT_TYPES_WITHOUT_LIVE_STREAM_KEY = {"srt", "redundantRtmp"}
 
 
 def _client():
@@ -103,14 +108,15 @@ def main(argv: list[str]) -> int:
         )
         print("encoding is RUNNING. Waiting for ingest details...", flush=True)
 
+        needs_stream_key = input_type not in INPUT_TYPES_WITHOUT_LIVE_STREAM_KEY
+
         def live_check():
             details, err = _safe_call(api.encoding.encodings.live.get, args.encoding_id)
             if details is None:
                 return None, err
             if not getattr(details, "encoder_ip", None):
                 return None, None
-            # SRT ingest has no user-facing stream key; only RTMP needs it.
-            if input_type != "srt" and not getattr(details, "stream_key", None):
+            if needs_stream_key and not getattr(details, "stream_key", None):
                 return None, None
             return details, None
 
@@ -118,7 +124,7 @@ def main(argv: list[str]) -> int:
             live_check,
             timeout_min=args.timeout_min,
             poll_sec=args.poll_sec,
-            label="encoder IP" + ("" if input_type == "srt" else " / stream key"),
+            label="encoder IP" + (" / stream key" if needs_stream_key else ""),
         )
     except TimeoutError as exc:
         sys.exit(f"error: {exc}")

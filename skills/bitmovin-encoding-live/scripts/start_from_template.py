@@ -48,6 +48,27 @@ def _post_template(api, template_body: dict):
     return api.encoding.templates.start(template_body)
 
 
+def _format_api_error(exc: Exception) -> str:
+    """Compact one-line summary of a Bitmovin SDK error.
+
+    The SDK's BitmovinError.__str__ dumps the entire request and response,
+    which is too noisy on a 4xx (and risks leaking the full template body —
+    including secrets like an SRT passphrase or stream key — to the user's
+    terminal). Surface only short message + developerMessage + errorCode.
+    """
+    short = getattr(exc, "short_message", None)
+    if not short:
+        short = str(exc).splitlines()[0] if str(exc) else type(exc).__name__
+    parts = [short]
+    dev = getattr(exc, "developer_message", None)
+    if dev and dev != short:
+        parts.append(f"developerMessage: {dev}")
+    code = getattr(exc, "error_code", None)
+    if code is not None:
+        parts.append(f"errorCode: {code}")
+    return "; ".join(parts)
+
+
 def _extract_state(template_yaml: str, encoding_id: str) -> dict:
     """Pull non-secret context out of the rendered template for state.json."""
     body = yaml.safe_load(template_yaml) or {}
@@ -126,7 +147,10 @@ def main(argv: list[str]) -> int:
         _validate_against_schema(template_path, template_body)
 
     api = _client()
-    response = _post_template(api, template_body)
+    try:
+        response = _post_template(api, template_body)
+    except Exception as exc:
+        sys.exit(f"error: POST /encoding/templates/start failed: {_format_api_error(exc)}")
 
     encoding_id = getattr(response, "encoding_id", None) or getattr(
         response, "encodingId", None
