@@ -15,6 +15,12 @@
       "source": "./plugins/bitmovin-encoding-live",
       "description": "Bitmovin live encoding skill for Claude Code (RTMP, redundant RTMP, SRT) via the Encoding Templates API.",
       "version": "0.1.0"
+    },
+    {
+      "name": "bitmovin-encoding-vod",
+      "source": "./plugins/bitmovin-encoding-vod",
+      "description": "Bitmovin VOD encoding skill for Claude Code (H.264 per-title, fixed ladder, AV1 UGC, hardware-accelerated sports clips) via the Encoding Templates API.",
+      "version": "0.1.0"
     }
   ]
 }

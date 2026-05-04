@@ -1,0 +1,60 @@
+# Parameter file consumed by the Jinja templates in ../templates/.
+# Copy to your working dir and edit. Never put credentials in here.
+
+# --- required for every template -------------------------------------------
+encodingName: my-vod-test
+
+# Input source. Always reference by id — the skill creates HTTP/HTTPS
+# inputs for you on the fly via scripts/create_input.py and reuses
+# everything else (S3, GCS, Azure, …) via scripts/list_inputs.py.
+inputId: 00000000-0000-0000-0000-000000000000
+# Path to the input file *inside* the input source. For HTTP/HTTPS, this
+# is the URL path component. For S3/GCS, the object key.
+inputPath: /sintel/sintel.mp4
+
+# Output created in advance via scripts/create_output.py or scripts/list_outputs.py.
+outputId: 00000000-0000-0000-0000-000000000000
+
+# Path prefix inside the output bucket. Trailing slash optional; the
+# templates normalize it to exactly one separator before child paths.
+outputBasePath: vod/my-vod-test/
+
+# --- optional, with defaults -----------------------------------------------
+# segmentLength applies to per-title-h264, fixed-ladder-h264, sports-clips-h264.
+# av1-per-title-ugc writes progressive MP4 (no segments).
+# manifests + audioBitrate apply only to per-title-h264 and fixed-ladder-h264.
+# av1-per-title-ugc and sports-clips-h264 are video-only; sports-clips-h264
+# hardcodes HLS-only and av1-per-title-ugc has no manifest at all.
+segmentLength: 4.0
+manifests: [dash, hls]      # any subset of [dash, hls]
+
+# encoderVersion: STABLE (default) or BETA. Applies to all scenarios.
+encoderVersion: STABLE
+
+audioBitrate: 128000
+
+# ACL applied to manifests and segments in the output bucket.
+# - PUBLIC_READ: world-readable HTTPS URLs (handy for demos/tests).
+#   Default for per-title-h264, fixed-ladder-h264.
+# - PRIVATE: provider treats them as private; consumers need signed URLs.
+#   Default for av1-per-title-ugc and sports-clips-h264 — those scenarios
+#   typically re-package via the customer's own CDN.
+# - NONE: omit the acl block entirely; provider's bucket-level default
+#   applies (use this for buckets with object-ownership policies that
+#   forbid per-object ACLs, e.g. S3 buckets with ACLs disabled).
+outputAcl: PUBLIC_READ
+
+# --- fixed-ladder-h264 only ------------------------------------------------
+# A list of {height, bitrate} pairs. Skipped by both per-title scenarios
+# (per-title-h264, av1-per-title-ugc) — they generate their own ladders.
+videoLadder:
+  - { height: 1080, bitrate: 4800000 }
+  - { height: 720,  bitrate: 2400000 }
+  - { height: 480,  bitrate: 1200000 }
+  - { height: 360,  bitrate:  800000 }
+
+# --- fixed-ladder-h264 only ------------------------------------------------
+# The per-title scenarios (per-title-h264, av1-per-title-ugc) hardcode
+# THREE_PASS because per-title needs the analysis pass.
+# SINGLE_PASS / TWO_PASS / THREE_PASS for fixed-ladder-h264.
+encodingMode: SINGLE_PASS

@@ -1,0 +1,93 @@
+{# Bitmovin Encoding Template — AV1 Per-Title VOD encoding for UGC pipelines.
+
+   AV1 saves ~50% bitrate vs H.264 at the same visual quality. Per-Title
+   picks the optimal ladder per asset, which matters more for newer codecs
+   where good ladder defaults are still in flux.
+
+   This template emits a *progressive MP4 file per rendition* (one per-title
+   rendition + one fixed 1080p anchor) — no fmp4 segments, no DASH/HLS
+   manifest. Matches typical viral-UGC pipelines that ingest the asset and
+   then download / re-package / serve via their own CDN. THREE_PASS is
+   required for per-title.
+
+   Intentionally video-only (no audio stream) and no manifests — both
+   match the published UGC playbook. If you need either, hand-edit the
+   rendered YAML before submitting. #}
+metadata:
+  type: VOD
+  name: {{ encodingName }}
+
+{% set outputBasePathPrefix = (outputBasePath.rstrip('/') ~ '/') if outputBasePath else '' %}
+
+configurations:
+  video:
+    av1:
+      v-av1:
+        properties:
+          name: {{ encodingName }} av1 per-title template
+      v-av1-1080p:
+        properties:
+          name: {{ encodingName }} av1 per-title 1080p anchor
+          height: 1080
+
+encodings:
+  main-encoding:
+    properties:
+      name: {{ encodingName }}
+      encoderVersion: {{ encoderVersion | default('STABLE') }}
+
+    streams:
+      s-video:
+        properties:
+          inputStreams:
+            - inputId: {{ inputId }}
+              inputPath: {{ inputPath }}
+              selectionMode: AUTO
+          codecConfigId: $/configurations/video/av1/v-av1
+          mode: PER_TITLE_TEMPLATE
+      s-video-1080p:
+        properties:
+          inputStreams:
+            - inputId: {{ inputId }}
+              inputPath: {{ inputPath }}
+              selectionMode: AUTO
+          codecConfigId: $/configurations/video/av1/v-av1-1080p
+          mode: PER_TITLE_TEMPLATE_FIXED_RESOLUTION
+
+    muxings:
+      mp4:
+        m-video:
+          properties:
+            name: video per-title av1 mp4
+            filename: video.mp4
+            streamConditionsMode: DROP_MUXING
+            streams:
+              - streamId: $/encodings/main-encoding/streams/s-video
+            outputs:
+              - outputId: {{ outputId }}
+                outputPath: "{{ outputBasePathPrefix }}video/{width}_{bitrate}_{uuid}/"
+                {% if outputAcl | default('PRIVATE') != 'NONE' %}
+                acl:
+                  - permission: {{ outputAcl | default('PRIVATE') }}
+                {% endif %}
+        m-video-1080p:
+          properties:
+            name: video per-title av1 1080p mp4
+            filename: video_1080p.mp4
+            streamConditionsMode: DROP_MUXING
+            streams:
+              - streamId: $/encodings/main-encoding/streams/s-video-1080p
+            outputs:
+              - outputId: {{ outputId }}
+                outputPath: "{{ outputBasePathPrefix }}video/{bitrate}/"
+                {% if outputAcl | default('PRIVATE') != 'NONE' %}
+                acl:
+                  - permission: {{ outputAcl | default('PRIVATE') }}
+                {% endif %}
+
+    start:
+      properties:
+        encodingMode: THREE_PASS
+        perTitle:
+          av1Configuration:
+            autoRepresentations: {}

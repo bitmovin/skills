@@ -1,0 +1,11 @@
+{
+  "name": "bitmovin-encoding-vod",
+  "description": "Teach Claude how to create and start a Bitmovin VOD encoding (H.264 per-title, H.264 fixed ladder, AV1 per-title for UGC, or H.264 hardware-accelerated sports clips) end-to-end via the Encoding Templates API and the Bitmovin Python SDK. Covers input/output handling, parameter gathering, template rendering, schema validation, and waiting for FINISHED.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Bitmovin"
+  },
+  "homepage": "https://github.com/bitmovin/skills",
+  "repository": "https://github.com/bitmovin/skills",
+  "license": "MIT"
+}

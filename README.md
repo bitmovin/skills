@@ -14,7 +14,7 @@ This repo is intentionally **not tied to Claude Code only**:
 | Skill | Status | What it covers |
 | --- | --- | --- |
 | [`bitmovin-player-web`](skills/bitmovin-player-web/SKILL.md) | Available | Bitmovin Web Player SDK — Player v8 (stable) and Player Web X / PWX (next-gen) |
-| `bitmovin-encoding-vod` | Planned | VOD encoding with the Bitmovin Encoding API |
+| [`bitmovin-encoding-vod`](skills/bitmovin-encoding-vod/SKILL.md) | Available | VOD encoding with the Bitmovin Encoding API (H.264 per-title, fixed ladder, AV1 UGC, hardware-accelerated sports clips) via the Encoding Templates API |
 | [`bitmovin-encoding-live`](skills/bitmovin-encoding-live/SKILL.md) | Available | Live encoding with the Bitmovin Encoding API (RTMP, redundant RTMP, SRT) via the Encoding Templates API |
 | `bitmovin-observability` | Planned | Bitmovin Analytics and observability tooling |
 | `video-development` | Planned | General video development guidance (codecs, packaging, DRM, streaming protocols) not specific to Bitmovin |
@@ -155,6 +155,25 @@ CMAF output (fmp4 muxings serving DASH and HLS, `manifestGenerator: V2`); RTMP /
 ### Out of scope
 
 DRM, SCTE-35 / ESAM, ad insertion, live content insertion, multi-period DASH, captions/subtitles, custom infrastructure (BYOC), and standby pools. The skill points users at https://developer.bitmovin.com/encoding/docs for those.
+
+## Skill: bitmovin-encoding-vod
+
+When you ask an agent to run a Bitmovin VOD encoding, the skill:
+
+1. **Drives the Encoding Templates API** — a single `POST /encoding/templates/start` creates inputs, codec configs, encoding, streams, muxings, manifests, and starts the encoding from one YAML document
+2. **Ships four Jinja templates** — H.264 per-title (algorithm-picked ladder, THREE_PASS), H.264 fixed ladder (you specify renditions), AV1 per-title for UGC (progressive MP4 per rendition, no manifest), and an H.264 sports-clips template using NVIDIA hardware acceleration (`VOD_HARDWARE_SHORTFORM` preset, hardcoded 9-rendition sports ladder, HLS-only, pinned to `AWS_EU_WEST_1`)
+3. **Walks the user one question at a time** — encoding name, input (reuse or create HTTPS), output (reuse or create), output base path, manifests, ladder, audio bitrate, segment length, encoder version, encoding mode
+4. **Validates the rendered template** against Bitmovin's published Encoding Template JSON schema before submitting
+5. **Polls until `FINISHED`** and prints manifest URLs and the dashboard URL
+6. **Refuses to materialize credentialed inputs** — only HTTP/HTTPS inputs are created from the skill; S3 / GCS / Azure inputs MUST be reused via an existing input id, so credentials never enter the params or template
+
+### What's covered
+
+H.264 (per-title and fixed-ladder, SINGLE_PASS / TWO_PASS / THREE_PASS) and AV1 per-title; CMAF fmp4 (DASH + HLS) for the H.264 templates; progressive MP4 for AV1 UGC; HLS-only with explicit per-rendition manifest config for the sports-clips hardware template; HTTP / HTTPS / S3 / GCS / Azure inputs (creation only for HTTP/HTTPS); S3 / GCS outputs (reuse or create); ACL choices (PUBLIC_READ / PRIVATE / NONE) with scenario-aware defaults.
+
+### Out of scope
+
+DRM, HDR / Dolby Vision, SCTE-35 / ESAM, ad insertion, multi-period DASH, captions/subtitles, filters, VP9, concatenation, custom infrastructure (BYOC), and standby pools. The skill points users at https://developer.bitmovin.com/encoding/docs for those.
 
 ## Other Hosts
 

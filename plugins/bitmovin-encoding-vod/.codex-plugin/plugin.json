@@ -1,0 +1,43 @@
+{
+  "name": "bitmovin-encoding-vod",
+  "version": "0.1.0",
+  "description": "Portable Bitmovin VOD encoding skill packaged for Codex as a local plugin.",
+  "author": {
+    "name": "Bitmovin",
+    "url": "https://github.com/bitmovin/skills"
+  },
+  "homepage": "https://github.com/bitmovin/skills",
+  "repository": "https://github.com/bitmovin/skills",
+  "license": "MIT",
+  "keywords": [
+    "bitmovin",
+    "video",
+    "encoding",
+    "vod",
+    "h264",
+    "av1",
+    "per-title",
+    "streaming",
+    "codex-plugin"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Bitmovin VOD Encoding",
+    "shortDescription": "Create and start a Bitmovin VOD encoding (H.264 per-title, fixed ladder, AV1 UGC, sports clips)",
+    "longDescription": "Walks the user through creating and starting a Bitmovin VOD encoding end-to-end via the Encoding Templates API and the Bitmovin Python SDK. Renders Jinja templates from a small parameter file, validates against the published Encoding Template JSON schema, submits and polls until the encoding is FINISHED, and prints manifest URLs. Covers H.264 per-title (algorithm-picked ladder), H.264 fixed ladder, AV1 per-title for UGC (progressive MP4), and a hardware-accelerated H.264 sports-clips template tuned for time-to-publish.",
+    "developerName": "Bitmovin",
+    "category": "Coding",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/bitmovin/skills",
+    "defaultPrompt": [
+      "Run a per-title H.264 VOD encoding on Bitmovin",
+      "Set up a fixed-ladder H.264 VOD encoding on Bitmovin",
+      "Encode this UGC video with AV1 per-title on Bitmovin"
+    ],
+    "brandColor": "#1730E7"
+  }
+}
