@@ -1,0 +1,11 @@
+{
+  "name": "bitmovin-encoding-live",
+  "description": "Teach Claude how to create and start a Bitmovin live encoding (RTMP, redundant RTMP, or SRT) end-to-end via the Encoding Templates API and the Bitmovin Python SDK. Covers output handling, parameter gathering, template rendering, and stream-key / ingest-URL retrieval.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Bitmovin"
+  },
+  "homepage": "https://github.com/bitmovin/skills",
+  "repository": "https://github.com/bitmovin/skills",
+  "license": "MIT"
+}

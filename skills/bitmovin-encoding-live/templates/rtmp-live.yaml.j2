@@ -1,0 +1,204 @@
+{# Bitmovin Encoding Template — single RTMP live ingest, fmp4 DASH+HLS (CMAF).
+
+Note: Bitmovin's API exposes user-created RTMP inputs under `redundantRtmp`
+even when there is only a single ingest point — there is no separate
+non-redundant `rtmp` input type. With one staticIngestPoint this behaves
+as a "simple RTMP" setup. #}
+metadata:
+  type: LIVE
+  name: {{ encodingName }}
+
+{% set outputBasePathPrefix = (outputBasePath.rstrip('/') ~ '/') if outputBasePath else '' %}
+
+inputs:
+  redundantRtmp:
+    main-rtmp-input:
+      properties:
+        name: {{ encodingName }} RTMP input
+        staticIngestPoints:
+          - name: Main ingest point
+            streamKeyConfiguration:
+              type: GENERATE
+
+configurations:
+  video:
+    h264:
+{% for r in videoLadder %}
+      v-{{ r.height }}p:
+        properties:
+          height: {{ r.height }}
+          bitrate: {{ r.bitrate }}
+          presetConfiguration: LIVE_LOW_LATENCY
+{% endfor %}
+  audio:
+    aac:
+      a-aac:
+        properties:
+          channelLayout: NONE
+          bitrate: {{ audioBitrate | default(128000) }}
+          rate: 48000.0
+
+encodings:
+  main-encoding:
+    properties:
+      name: {{ encodingName }}
+      cloudRegion: {{ cloudRegion }}
+      encoderVersion: {{ encoderVersion | default('STABLE') }}
+
+    streams:
+{% for r in videoLadder %}
+      s-{{ r.height }}p:
+        properties:
+          inputStreams:
+            - inputId: $/inputs/redundantRtmp/main-rtmp-input
+              inputPath: /
+              selectionMode: AUTO
+          codecConfigId: $/configurations/video/h264/v-{{ r.height }}p
+{% endfor %}
+      s-audio:
+        properties:
+          inputStreams:
+            - inputId: $/inputs/redundantRtmp/main-rtmp-input
+              inputPath: /
+              selectionMode: AUTO
+          codecConfigId: $/configurations/audio/aac/a-aac
+          mode: STANDARD
+
+    muxings:
+      fmp4:
+{% for r in videoLadder %}
+        m-{{ r.height }}p:
+          properties:
+            streams:
+              - streamId: $/encodings/main-encoding/streams/s-{{ r.height }}p
+            outputs:
+              - outputId: {{ outputId }}
+                outputPath: "{{ outputBasePathPrefix }}video/{{ r.height }}p/"
+                {% if outputAcl | default('PUBLIC_READ') != 'NONE' %}
+                acl:
+                  - permission: {{ outputAcl | default('PUBLIC_READ') }}
+                {% endif %}
+            segmentLength: {{ segmentLength | default(4.0) }}
+            segmentNaming: "seg_%number%.m4s"
+{% endfor %}
+        m-audio:
+          properties:
+            streams:
+              - streamId: $/encodings/main-encoding/streams/s-audio
+            outputs:
+              - outputId: {{ outputId }}
+                outputPath: "{{ outputBasePathPrefix }}audio/{{ audioBitrate | default(128000) }}/"
+                {% if outputAcl | default('PUBLIC_READ') != 'NONE' %}
+                acl:
+                  - permission: {{ outputAcl | default('PUBLIC_READ') }}
+                {% endif %}
+            segmentLength: {{ segmentLength | default(4.0) }}
+            segmentNaming: "seg_%number%.m4s"
+
+    live:
+      start:
+        properties:
+          streamKey: {{ streamKey }}
+          manifestGenerator: V2
+          autoShutdownConfiguration:
+            streamTimeoutMinutes: {{ autoShutdownStreamTimeoutMin | default(30) }}
+            bytesReadTimeoutSeconds: {{ autoShutdownBytesReadTimeoutSec | default(30) }}
+{% if 'dash' in manifests %}
+          dashManifests:
+            - manifestId: $/manifests/dash/main-dash
+              timeshift: 120
+              liveEdgeOffset: 10
+{% endif %}
+{% if 'hls' in manifests %}
+          hlsManifests:
+            - manifestId: $/manifests/hls/main-hls
+              timeshift: 120
+              liveEdgeOffset: 10
+{% endif %}
+
+manifests:
+{% if 'hls' in manifests %}
+  hls:
+    main-hls:
+      properties:
+        manifestName: main.m3u8
+        outputs:
+          - outputId: {{ outputId }}
+            outputPath: "{{ outputBasePathPrefix }}"
+            {% if outputAcl | default('PUBLIC_READ') != 'NONE' %}
+            acl:
+              - permission: {{ outputAcl | default('PUBLIC_READ') }}
+            {% endif %}
+      media:
+        audio:
+          audio-media:
+            properties:
+              name: Audio Media
+              uri: "audio.m3u8"
+              segmentPath: "audio/{{ audioBitrate | default(128000) }}/"
+              language: en
+              groupId: AUDIO
+              isDefault: true
+              encodingId: $/encodings/main-encoding
+              muxingId: $/encodings/main-encoding/muxings/fmp4/m-audio
+              streamId: $/encodings/main-encoding/streams/s-audio
+      streams:
+{% for r in videoLadder %}
+        s-{{ r.height }}p-info:
+          properties:
+            name: Video {{ r.height }}p
+            uri: "video_{{ r.height }}p.m3u8"
+            segmentPath: "video/{{ r.height }}p/"
+            audio: AUDIO
+            forceFrameRateAttribute: true
+            encodingId: $/encodings/main-encoding
+            muxingId: $/encodings/main-encoding/muxings/fmp4/m-{{ r.height }}p
+            streamId: $/encodings/main-encoding/streams/s-{{ r.height }}p
+{% endfor %}
+{% endif %}
+{% if 'dash' in manifests %}
+  dash:
+    main-dash:
+      properties:
+        name: Main DASH Manifest
+        manifestName: main.mpd
+        outputs:
+          - outputId: {{ outputId }}
+            outputPath: "{{ outputBasePathPrefix }}"
+            {% if outputAcl | default('PUBLIC_READ') != 'NONE' %}
+            acl:
+              - permission: {{ outputAcl | default('PUBLIC_READ') }}
+            {% endif %}
+      periods:
+        period-1:
+          properties:
+            start: 0
+          adaptationsets:
+            video:
+              video-as:
+                properties:
+                  labels:
+                    - value: video
+                representations:
+                  fmp4:
+{% for r in videoLadder %}
+                    rep-{{ r.height }}p:
+                      properties:
+                        type: TEMPLATE
+                        encodingId: $/encodings/main-encoding
+                        muxingId: $/encodings/main-encoding/muxings/fmp4/m-{{ r.height }}p
+                        segmentPath: "video/{{ r.height }}p/"
+{% endfor %}
+            audio:
+              audio-as:
+                properties:
+                  lang: en
+                representations:
+                  fmp4:
+                    rep-audio:
+                      properties:
+                        type: TEMPLATE
+                        encodingId: $/encodings/main-encoding
+                        muxingId: $/encodings/main-encoding/muxings/fmp4/m-audio
+                        segmentPath: "audio/{{ audioBitrate | default(128000) }}/"
+{% endif %}

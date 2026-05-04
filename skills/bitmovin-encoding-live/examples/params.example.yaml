@@ -1,0 +1,59 @@
+# Parameter file consumed by the Jinja templates in ../templates/.
+# Copy to your working dir and edit. Never put credentials in here.
+
+# --- required for every template -------------------------------------------
+encodingName: my-live-test
+# Cloud region. Always set explicitly. Examples:
+#   AWS_EU_WEST_1, AWS_US_EAST_1, AWS_AP_SOUTHEAST_1
+#   GOOGLE_EUROPE_WEST_1, GOOGLE_US_CENTRAL_1
+#   AZURE_EUROPE_WEST
+cloudRegion: AWS_EU_WEST_1
+
+# Output created in advance via scripts/create_output.py or scripts/list_outputs.py.
+outputId: 00000000-0000-0000-0000-000000000000
+
+# Path prefix inside the output bucket. Trailing slash optional; the
+# templates normalize it to exactly one separator before child paths.
+outputBasePath: live/my-live-test/
+
+# Stream key the user will push with. 3-20 chars, [a-zA-Z0-9].
+# RTMP scenarios only — SRT ingest is identified by host/port; the SRT
+# template defaults streamKey internally to satisfy the API schema.
+streamKey: bitmovin
+
+# --- optional, with defaults -----------------------------------------------
+segmentLength: 4.0
+manifests: [dash, hls]      # any subset of [dash, hls]
+
+videoLadder:
+  - { height: 720, bitrate: 3000000 }
+  - { height: 480, bitrate: 1600000 }
+  - { height: 240, bitrate: 800000 }
+
+audioBitrate: 128000
+
+# encoderVersion: STABLE (default) or BETA
+encoderVersion: STABLE
+
+autoShutdownStreamTimeoutMin: 30
+autoShutdownBytesReadTimeoutSec: 30
+
+# ACL applied to manifests and segments in the output bucket.
+# - PUBLIC_READ: world-readable HTTPS URLs (handy for demos/tests). Default
+#   if omitted.
+# - PRIVATE: provider treats them as private; consumers need signed URLs.
+# - NONE: omit the acl block entirely; provider's bucket-level default
+#   applies (use this for buckets with object-ownership policies that
+#   forbid per-object ACLs, e.g. S3 buckets with ACLs disabled).
+outputAcl: PUBLIC_READ
+
+# --- SRT template only -----------------------------------------------------
+# srtMode: CALLER          # or LISTENER
+# srtHost: ingest.example  # required only for CALLER mode
+# srtPort: 2088            # 2088/2089/2090/2091 in LISTENER mode
+# srtPath: live
+# srtLatencyMs: 2000
+# Optional AES passphrase for the SRT input. Must be exactly 16 chars
+# (AES-128) or 32 chars (AES-256); the template infers keyLength from
+# the length. Omit for an unencrypted SRT stream.
+# srtPassphrase: 0123456789abcdef

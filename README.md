@@ -15,7 +15,7 @@ This repo is intentionally **not tied to Claude Code only**:
 | --- | --- | --- |
 | [`bitmovin-player-web`](skills/bitmovin-player-web/SKILL.md) | Available | Bitmovin Web Player SDK — Player v8 (stable) and Player Web X / PWX (next-gen) |
 | `bitmovin-encoding-vod` | Planned | VOD encoding with the Bitmovin Encoding API |
-| `bitmovin-encoding-live` | Planned | Live encoding with the Bitmovin Encoding API |
+| [`bitmovin-encoding-live`](skills/bitmovin-encoding-live/SKILL.md) | Available | Live encoding with the Bitmovin Encoding API (RTMP, redundant RTMP, SRT) via the Encoding Templates API |
 | `bitmovin-observability` | Planned | Bitmovin Analytics and observability tooling |
 | `video-development` | Planned | General video development guidance (codecs, packaging, DRM, streaming protocols) not specific to Bitmovin |
 
@@ -101,11 +101,12 @@ A local Codex marketplace entry looks like:
 
 ## Repo Layout
 
-- `skills/<skill-name>/SKILL.md`: the portable skill content (one directory per skill)
-- `.claude-plugin/plugin.json`: Claude Code plugin metadata
+- `skills/<skill-name>/`: the portable skill content (one directory per skill, with `SKILL.md` plus any scripts / templates / examples it ships)
 - `.claude-plugin/marketplace.json`: Claude marketplace metadata (lists every skill exposed as a Claude plugin)
+- `.claude-plugin/plugin.json`: Claude Code plugin metadata for the legacy root-as-plugin layout (`bitmovin-player-web`)
+- `plugins/<skill-name>/.claude-plugin/plugin.json`: Claude Code plugin metadata (per-plugin layout used by newer skills)
 - `plugins/<skill-name>/.codex-plugin/plugin.json`: Codex plugin metadata (one per skill)
-- `plugins/<skill-name>/skills/<skill-name>/SKILL.md`: symlink to the shared root skill
+- `plugins/<skill-name>/skills/<skill-name>/`: symlink back to `skills/<skill-name>/` (for skills that ship only `SKILL.md` it can be a per-file symlink instead — `bitmovin-player-web` uses that variant)
 - `.agents/plugins/marketplace.json`: Codex marketplace metadata
 
 ## Skill: bitmovin-player-web
@@ -136,20 +137,40 @@ LLMs have stale or confused Bitmovin Player Web knowledge. Common failures witho
 
 **Player Web X / PWX (next-gen):** Native PWX API (`Player({key, defaultContainer})` + `player.sources.add()`), CDN bundles (`hls`, `dash`, `core`, `bitmovin-v8` compat), v8 compatibility layer for drop-in migration, custom packages system, and dated notes about current feature gaps from the official support matrix.
 
+## Skill: bitmovin-encoding-live
+
+When you ask an agent to start a Bitmovin live encoding, the skill:
+
+1. **Drives the Encoding Templates API** — a single `POST /encoding/templates/start` creates inputs, codec configs, encoding, streams, muxings, manifests, and starts the live encoding from one YAML document
+2. **Ships three Jinja templates** — single RTMP, redundant RTMP (HA ingest), and SRT (LISTENER / CALLER, optional AES passphrase)
+3. **Walks the user one question at a time** — encoding name, cloud region, output (reuse or create), output base path, manifests, ladder, audio bitrate, segment length, encoder version, auto-shutdown timeouts
+4. **Validates the rendered template** against Bitmovin's published Encoding Template JSON schema before submitting (the API otherwise accepts mistyped fields silently and the encoding gets stuck in `CREATED`)
+5. **Polls until `RUNNING`** and prints the ingest URL, manifest URLs, and dashboard URL
+6. **Keeps secrets out of params, state, and logs** — credentials are read from environment variables only
+
+### What's covered
+
+CMAF output (fmp4 muxings serving DASH and HLS, `manifestGenerator: V2`); RTMP / RTMPS / SRT ingest; AWS / GCP / Azure cloud regions; S3 / GCS outputs (reuse or create); per-encoding stream key (RTMP) or host:port (SRT); ACL choices (PUBLIC_READ / PRIVATE / NONE); auto-shutdown on stream loss / no bytes read; STABLE vs BETA encoder.
+
+### Out of scope
+
+DRM, SCTE-35 / ESAM, ad insertion, live content insertion, multi-period DASH, captions/subtitles, custom infrastructure (BYOC), and standby pools. The skill points users at https://developer.bitmovin.com/encoding/docs for those.
+
 ## Other Hosts
 
 Skill files are plain markdown and can be reused in any agent environment that supports local skills, such as Cursor, Copilot, Codex, Goose, Gemini CLI, and Cline. The host-specific wrappers in this repo are `.claude-plugin/` for Claude Code and `plugins/<skill-name>/.codex-plugin/` for Codex.
 
 ## Contributing
 
-The source of truth for each skill is `skills/<skill-name>/SKILL.md`. Keep it portable across hosts. If you change packaged plugin behavior or published metadata, keep the wrappers in sync:
-- `.claude-plugin/plugin.json`
+The source of truth for each skill is `skills/<skill-name>/` (with `SKILL.md` at the top plus any scripts, templates, and examples the skill ships). Keep it portable across hosts. If you change packaged plugin behavior or published metadata, keep the wrappers in sync:
+- `.claude-plugin/plugin.json` (legacy root-as-plugin layout, used by `bitmovin-player-web`)
 - `.claude-plugin/marketplace.json`
+- `plugins/<skill-name>/.claude-plugin/plugin.json` (per-plugin layout, used by newer skills)
 - `plugins/<skill-name>/.codex-plugin/plugin.json`
-- `plugins/<skill-name>/skills/<skill-name>/SKILL.md`
+- `plugins/<skill-name>/skills/<skill-name>/` (symlink back to `skills/<skill-name>/` — directory symlink for skills that ship scripts/templates/examples; per-file symlink works for `SKILL.md`-only skills)
 - `.agents/plugins/marketplace.json`
 
-The Codex plugin skill path is intentionally a symlink back to `skills/<skill-name>/SKILL.md` so the repo only has one canonical skill payload per skill.
+The plugin skill path is intentionally a symlink back into `skills/<skill-name>/` so the repo only has one canonical skill payload per skill.
 
 Keep instructions concrete: code examples for every claim, primary-source links, and explicit "common mistakes" sections.
 
