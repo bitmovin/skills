@@ -118,13 +118,9 @@ files without a manifest. The sports-clips template produces fmp4 with
 HLS-only manifests using a hardware-accelerated preset. The rendered YAML
 is plain text — feel free to hand-edit before submitting.
 
-## Out of scope
+### Out of scope
 
-DRM, HDR/Dolby Vision, SCTE-35/ESAM, ad insertion, multi-period DASH,
-captions/subtitles, filters, VP9, concatenation, custom infrastructure
-(BYOC), and standby pools are out of scope for this skill (AV1 is covered
-by the `av1-per-title-ugc` template). See
-https://developer.bitmovin.com/encoding/docs for those topics.
+DRM, HDR / Dolby Vision, SCTE-35 / ESAM, ad insertion, multi-period DASH, captions/subtitles, filters, VP9, concatenation, custom infrastructure (BYOC), and standby pools. The skill points users at https://developer.bitmovin.com/encoding/docs for those.
 
 ## Security notes
 

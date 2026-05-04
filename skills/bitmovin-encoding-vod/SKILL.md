@@ -319,7 +319,7 @@ VOD — it has already terminated.
 - Multi-period DASH
 - Captions and subtitles (CEA-608/708, WebVTT, IMSC)
 - Filters (watermark, scale, crop, text overlay)
-- VP9 codec (AV1 is covered by `av1-per-title-ugc`)
+- VP9 codec (AV1 is supported via `av1-per-title-ugc`)
 - Concatenation of multiple inputs
 - Per-Title with manual ladder anchors beyond the single 1080p anchor
 

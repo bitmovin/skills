@@ -121,7 +121,7 @@ manifests:
             encodingId: $/encodings/main-encoding
             streamId: $/encodings/main-encoding/streams/s-{{ r.name }}
             muxingId: $/encodings/main-encoding/muxings/fmp4/m-{{ r.name }}
-            segmentPath: "{{ outputBasePathPrefix }}video/{{ r.name }}/"
+            segmentPath: "video/{{ r.name }}/"
 {% endfor %}
 
       start:
