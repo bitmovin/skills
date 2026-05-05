@@ -206,6 +206,10 @@ After integration changes, verify each applicable capability:
    - For SDK debug logs, set `DebugConfig.isLoggingEnabled = true` (**before** creating any `Player`, `Source`, or `PlayerView`).
    - Prefer setting it once in `Application.onCreate` when troubleshooting.
    - SDK debug output is emitted through `android.util.Log`.
+   - Suggested logcat filters (SDK tags are instance-scoped, e.g. `BitmovinPlayer(1a2b3c)`):
+     - `adb logcat -v time | grep -E "Bitmovin(Player|AdPlayer|PlayerView|Source|Offline)(\\([0-9a-f]+\\))?|Bitmovin(Ad)?ExoPlayer\\([0-9a-f]+\\)"`
+     - `adb logcat -v time | grep -E "Bitmovin(Player|Source|PlayerView|Offline)|Error|Exception|DRM|Widevine|Cast"`
+     - Add your app-specific playback/session tag to narrow noise further.
    - Use this mainly for troubleshooting/bug reports; requires Bitmovin Player Android SDK `>= 3.93.0`.
    - Add/confirm targeted app playback logs around source resolution, fallback decisions, and session transitions.
 
