@@ -89,10 +89,8 @@ encodings:
             outputs:
               - outputId: {{ outputId }}
                 outputPath: "{{ outputBasePathPrefix }}video/{{ r.height }}p/"
-                {% if outputAcl | default('PUBLIC_READ') != 'NONE' %}
                 acl:
                   - permission: {{ outputAcl | default('PUBLIC_READ') }}
-                {% endif %}
             segmentLength: {{ segmentLength | default(4.0) }}
             segmentNaming: "seg_%number%.m4s"
 {% endfor %}
@@ -103,10 +101,8 @@ encodings:
             outputs:
               - outputId: {{ outputId }}
                 outputPath: "{{ outputBasePathPrefix }}audio/{{ audioBitrate | default(128000) }}/"
-                {% if outputAcl | default('PUBLIC_READ') != 'NONE' %}
                 acl:
                   - permission: {{ outputAcl | default('PUBLIC_READ') }}
-                {% endif %}
             segmentLength: {{ segmentLength | default(4.0) }}
             segmentNaming: "seg_%number%.m4s"
 
@@ -145,10 +141,8 @@ manifests:
         outputs:
           - outputId: {{ outputId }}
             outputPath: "{{ outputBasePathPrefix }}"
-            {% if outputAcl | default('PUBLIC_READ') != 'NONE' %}
             acl:
               - permission: {{ outputAcl | default('PUBLIC_READ') }}
-            {% endif %}
       media:
         audio:
           audio-media:
@@ -185,10 +179,8 @@ manifests:
         outputs:
           - outputId: {{ outputId }}
             outputPath: "{{ outputBasePathPrefix }}"
-            {% if outputAcl | default('PUBLIC_READ') != 'NONE' %}
             acl:
               - permission: {{ outputAcl | default('PUBLIC_READ') }}
-            {% endif %}
       periods:
         period-1:
           properties:

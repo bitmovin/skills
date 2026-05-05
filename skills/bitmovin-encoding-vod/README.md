@@ -139,6 +139,21 @@ produces fmp4 with HLS-only manifests using a hardware-accelerated
 preset. The rendered YAML is plain text — feel free to hand-edit before
 submitting.
 
+### Per-Title + custom manifests
+
+A single Encoding Template **cannot** combine Per-Title with custom
+DASH/HLS manifests, because the Stream and Muxing IDs that custom
+manifests reference are only known after the Per-Title analysis pass
+completes — the Templates API has no way to resolve those refs at
+submit time. That's why `per-title-h264` and `av1-per-title-ugc` use
+*default* manifests (`defaultapi.<id>`) rather than custom adaptation
+sets.
+
+If a workflow needs both, run two encoding templates in sequence:
+the first does the Per-Title encoding only; once it finishes, the
+second is a manifest-only template referencing the resulting
+streams/muxings.
+
 ## Security notes
 
 - Credentials (Bitmovin API key, output access/secret keys) are read

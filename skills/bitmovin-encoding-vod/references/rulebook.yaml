@@ -118,6 +118,25 @@ rules:
     applies_when: stream.mode == PER_TITLE_TEMPLATE_COMPLEXITY_RANGE
     notes: Replaces v0's combined "step_size" rule — this is the complexity-range part.
 
+  - id: per_title.no_custom_manifests_in_same_template
+    topic: per_title
+    rule: |
+      A single Encoding Template cannot combine Per-Title with custom
+      DASH/HLS manifests. Custom manifests reference Stream and Muxing
+      IDs that the Per-Title analysis only produces after the encoding
+      runs, so the Templates API cannot resolve those refs at submit
+      time. Per-Title encodings must use default manifests
+      (`manifests.<kind>.defaultapi.<id>`); workflows needing custom
+      adaptation sets must split into two encoding templates — first
+      the Per-Title encoding, then a manifest-only template referencing
+      the resulting streams/muxings.
+    applies_when: encoding.perTitle != null && manifests contain non-defaultapi entries
+    notes: |
+      Not enforced as a pre-submit check today; the Templates API will
+      accept a Per-Title + custom-manifest template and either drop the
+      manifests silently or fail asynchronously. Treat this as a
+      design-time constraint when authoring custom templates.
+
   # ─── Hardware encoding (gpu/nvenc) ────────────────────────────────────
   - id: hw.vod_only
     topic: hardware_encoding

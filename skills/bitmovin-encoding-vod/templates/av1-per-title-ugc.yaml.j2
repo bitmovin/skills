@@ -66,10 +66,8 @@ encodings:
             outputs:
               - outputId: {{ outputId }}
                 outputPath: "{{ outputBasePathPrefix }}video/{width}_{bitrate}_{uuid}/"
-                {% if outputAcl | default('PRIVATE') != 'NONE' %}
                 acl:
                   - permission: {{ outputAcl | default('PRIVATE') }}
-                {% endif %}
         m-video-1080p:
           properties:
             name: video per-title av1 1080p mp4
@@ -80,14 +78,13 @@ encodings:
             outputs:
               - outputId: {{ outputId }}
                 outputPath: "{{ outputBasePathPrefix }}video/{bitrate}/"
-                {% if outputAcl | default('PRIVATE') != 'NONE' %}
                 acl:
                   - permission: {{ outputAcl | default('PRIVATE') }}
-                {% endif %}
 
     start:
       properties:
         encodingMode: THREE_PASS
+        manifestGenerator: V2
         perTitle:
           av1Configuration:
             autoRepresentations: {}

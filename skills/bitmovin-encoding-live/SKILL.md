@@ -325,10 +325,11 @@ SRT block is only relevant for the `srt` scenario.
    - `live-<encodingName>` *(default — encodingName-derived; usually unique enough on first run)*
    - `bitmovin` *(short / memorable; likely already taken in established orgs)*
    - `Other (specify)`
-6. **outputAcl** — always ask, surface security implications.
+6. **outputAcl** — always ask, surface security implications. An ACL
+   must always be set; do **not** offer an `Other (specify)` fallback
+   for this question.
    - `PUBLIC_READ` *(default — anyone with the URL can play)*
    - `PRIVATE` *(signed URLs only)*
-   - `NONE` *(omit ACL block; bucket-level default applies)*
 7. **manifests**
    - `[dash, hls]` *(default)*
    - `[hls]`

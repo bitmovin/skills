@@ -319,7 +319,6 @@ question entirely for the others.
    - `PRIVATE` *(default for `av1-per-title-ugc` and `sports-clips-h264` —
      downstream pipelines typically re-package via their own CDN; signed
      URLs only)*
-   - `NONE` *(omit ACL block; bucket-level default applies)*
 4. **manifests** — `per-title-h264`, `fixed-ladder-h264` only.
    `av1-per-title-ugc` emits progressive MP4 without a manifest;
    `sports-clips-h264` hardcodes HLS-only.

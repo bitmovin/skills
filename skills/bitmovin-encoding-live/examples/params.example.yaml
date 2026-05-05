@@ -61,13 +61,11 @@ encoderVersion: STABLE
 autoShutdownStreamTimeoutMin: 30
 autoShutdownBytesReadTimeoutSec: 30
 
-# ACL applied to manifests and segments in the output bucket.
+# ACL applied to manifests and segments in the output bucket. An ACL
+# must always be set; the templates have no "no-ACL" emission path.
 # - PUBLIC_READ: world-readable HTTPS URLs (handy for demos/tests).
 #   Default if omitted.
 # - PRIVATE: provider treats them as private; consumers need signed URLs.
-# - NONE: omit the acl block entirely; provider's bucket-level default
-#   applies (use this for buckets with object-ownership policies that
-#   forbid per-object ACLs, e.g. S3 buckets with ACLs disabled).
 outputAcl: PUBLIC_READ
 
 # --- SRT template only -----------------------------------------------------

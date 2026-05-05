@@ -35,15 +35,14 @@ encoderVersion: STABLE
 
 audioBitrate: 128000
 
-# ACL applied to manifests and segments in the output bucket.
+# ACL applied to manifests and segments in the output bucket. The acl
+# block is always emitted — omitting it has caused failed encodings in
+# the past.
 # - PUBLIC_READ: world-readable HTTPS URLs (handy for demos/tests).
 #   Default for per-title-h264, fixed-ladder-h264.
 # - PRIVATE: provider treats them as private; consumers need signed URLs.
 #   Default for av1-per-title-ugc and sports-clips-h264 — those scenarios
 #   typically re-package via the customer's own CDN.
-# - NONE: omit the acl block entirely; provider's bucket-level default
-#   applies (use this for buckets with object-ownership policies that
-#   forbid per-object ACLs, e.g. S3 buckets with ACLs disabled).
 outputAcl: PUBLIC_READ
 
 # --- fixed-ladder-h264 only ------------------------------------------------

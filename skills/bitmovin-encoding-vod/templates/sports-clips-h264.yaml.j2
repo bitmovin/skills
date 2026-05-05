@@ -84,10 +84,8 @@ encodings:
             outputs:
               - outputId: {{ outputId }}
                 outputPath: "{{ outputBasePathPrefix }}video/{{ r.name }}/"
-                {% if outputAcl | default('PRIVATE') != 'NONE' %}
                 acl:
                   - permission: {{ outputAcl | default('PRIVATE') }}
-                {% endif %}
             initSegmentName: init.mp4
             segmentLength: {{ segmentLength | default(4.0) }}
             segmentNaming: "seg_%number%.m4s"
@@ -107,10 +105,8 @@ manifests:
         outputs:
           - outputId: {{ outputId }}
             outputPath: "{{ outputBasePathPrefix }}"
-            {% if outputAcl | default('PRIVATE') != 'NONE' %}
             acl:
               - permission: {{ outputAcl | default('PRIVATE') }}
-            {% endif %}
 
       streams:
 {% for r in sportsLadder %}

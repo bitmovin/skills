@@ -32,7 +32,7 @@ from __future__ import annotations
 
 import sys
 from dataclasses import dataclass
-from typing import Any, Callable, Iterable, Iterator
+from typing import Any, Callable, Iterator
 
 
 @dataclass(frozen=True)
@@ -588,7 +588,6 @@ def check_dv_bufsize_maxrate_required(template: dict) -> list[Violation]:
         refs = codec_to_encs.get(cpath, set())
         if refs and refs.issubset(per_title_encs):
             continue
-        missing = [k for k in ("bufsize", "maxBitrate") if props.get(k) is None]
         # API field names: bufSize, maxRate (camel-cased)
         bufsize = props.get("bufSize") if "bufSize" in props else props.get("bufsize")
         maxrate = props.get("maxRate") if "maxRate" in props else props.get("maxRate")
@@ -656,7 +655,6 @@ def check_dv_muxing_audio_codec_allowlist(template: dict) -> list[Violation]:
     Dolby Atmos audio in addition.
     """
     out = []
-    codec_lookup = _build_codec_lookup(template)
     stream_codec = _resolve_stream_codec(template)
     for mpath, _, _kind, _, props in _walk_muxings(template):
         mux_streams = props.get("streams") or []
