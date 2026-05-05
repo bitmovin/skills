@@ -15,6 +15,12 @@ Use this samples repository as the implementation companion reference (patterns,
 
 **https://github.com/bitmovin/bitmovin-player-android-samples**
 
+Use Android release notes to determine the latest Bitmovin Player Android SDK version:
+
+**https://developer.bitmovin.com/playback/docs/release-notes-android.md**
+
+Version policy: if not specified otherwise by the customer, use the latest Bitmovin Player Android SDK version.
+
 If examples, cached artifacts, old snippets, or prior assumptions conflict with the docs, follow the docs.
 
 ## When to use this skill
@@ -73,6 +79,7 @@ Before code changes, confirm from docs:
 
 - Required repository configuration
 - Correct dependency coordinates
+- SDK version policy: if the customer did not request a specific version, use the latest version from Android release notes
 - Feature modules needed (core player, media session, UI/cast-related modules)
 - Any mandatory manifest/service metadata
 
@@ -92,13 +99,22 @@ Build player config explicitly and keep it centralized:
 - Bind lifecycle correctly (start/resume/pause/stop/destroy) for both player and view.
 - Prevent leaks by disposing player/view/session cleanly.
 
-### 4) Source loading strategy
+### 4) Custom Bitmovin Web UI + native↔JS bridge
+
+- Bitmovin Web UI is open source and can be customized: **https://github.com/bitmovin/bitmovin-player-ui**.
+- Provide your custom Web UI bundle through `UiConfig.WebUi(...)` (typically via `jsLocation`/`cssLocation`, optionally `supplementalCssLocation`).
+- Sample-verified pattern (`CustomHtmlUiKotlin`): load UI assets from `file:///android_asset/custom-bitmovinplayer-ui.min.js` and `...css`.
+- Register `PlayerView.setCustomMessageHandler(CustomMessageHandler(...))` to enable native↔JS communication.
+- JS → native: expose `@JavascriptInterface` methods (for example `closePlayer`) on the handler object; JS can call them via `window.bitmovin.customMessageHandler.sendSynchronous(...)` / `sendAsynchronous(...)`.
+- Native → JS: call `customMessageHandler.sendMessage(name, data)`; JS can subscribe via `window.bitmovin.customMessageHandler.on(name, callback)`.
+
+### 5) Source loading strategy
 
 - Prefer hardcoding source types when the stream type is known.
 - Use `SourceConfig.fromUrl(...)` when source auto-detection is needed or the source type is unknown.
 - For multi-URL playback candidates (e.g., HLS/DASH alternatives), implement deterministic fallback behavior.
 
-### 5) PiP/fullscreen via Bitmovin handlers
+### 6) PiP/fullscreen via Bitmovin handlers
 
 Prefer Bitmovin handler wiring over fully custom PiP/fullscreen implementation:
 
@@ -106,48 +122,48 @@ Prefer Bitmovin handler wiring over fully custom PiP/fullscreen implementation:
 - Register Bitmovin PiP handler on `PlayerView`
 - Forward lifecycle hooks required by handlers
 
-### 6) Media session + background playback
+### 7) Media session + background playback
 
 - Use Bitmovin media session integration (`MediaSessionService` flow) for transport controls/background continuity.
 - Keep session lifecycle tightly coupled to active player instance.
 
-### 7) Cast integration
+### 8) Cast integration
 
 - Enable cast in Bitmovin remote/cast configuration.
 - Add required Android manifest metadata/provider setup for cast framework integration.
 - Reflect cast availability/active state through the documented player API shape.
 
-### 8) TV + mobile support
+### 9) TV + mobile support
 
 - Keep core player flow shared.
 - Switch Bitmovin Web UI variant by form factor (TV vs small-screen variant).
 - Ensure TV discoverability and launcher behavior are configured when targeting Android TV.
 
-### 9) Source switching strategy (Playlist-first)
+### 10) Source switching strategy (Playlist-first)
 
 - For frequent source changes (episodes/channels/next-previous flows), prefer the Bitmovin Playlist API.
 - Avoid full player teardown for normal transitions.
 - Use one-off source loading directly only when playlist behavior is not needed.
 
-### 10) Player lifecycle for performance
+### 11) Player lifecycle for performance
 
 - Reuse one player per playback scope where feasible.
 - Rebind view/UI to the reused player instead of recreating the player instance.
 - Destroy the player only when the playback context is truly finished.
 
-### 11) Config immutability pattern
+### 12) Config immutability pattern
 
 - Build configs in a construct-once/apply-once style where possible.
 - On behavior changes, create fresh config instances and apply deliberately.
 - Avoid mutating shared config instances after they are handed to SDK components.
 
-### 12) Dependency flavor policy
+### 13) Dependency flavor policy
 
 - If ExoPlayer/Media3 is present in the app, use Bitmovin `+jason` flavor dependencies.
 - Keep all Bitmovin modules aligned to the same flavor/version line.
 - Check dependency graph consistency before merge.
 
-### 13) Threading discipline
+### 14) Threading discipline
 
 - Run I/O and parsing on background dispatchers.
 - Marshal back to main thread before calling `Player` APIs.
@@ -156,6 +172,7 @@ Prefer Bitmovin handler wiring over fully custom PiP/fullscreen implementation:
 ## Common pitfalls to avoid
 
 - Using outdated repository/dependency coordinates
+- Pinning an older SDK version without a customer requirement
 - Calling documented properties as functions (or vice versa)
 - Relying on source auto-detection when the source type is known and should be explicit
 - Re-implementing PiP/fullscreen behavior that Bitmovin handlers already provide
