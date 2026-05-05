@@ -38,14 +38,11 @@ Verify with *"What skills do you have access to?"* — the installed skill shoul
 
 ## Install In ChatGPT / Codex
 
-If your ChatGPT/Codex setup supports local skills, copy skills into your Codex home:
+If your ChatGPT/Codex setup supports local skills, copy the skill into your Codex home:
 
 ```bash
 mkdir -p ~/.codex/skills/bitmovin-player-web
 cp skills/bitmovin-player-web/SKILL.md ~/.codex/skills/bitmovin-player-web/SKILL.md
-
-mkdir -p ~/.codex/skills/bitmovin-player-android
-cp skills/bitmovin-player-android/SKILL.md ~/.codex/skills/bitmovin-player-android/SKILL.md
 ```
 
 Repeat for any other skill in `skills/` you want available.
@@ -62,7 +59,6 @@ npx skills add bitmovin/skills --list
 
 # Install just one skill interactively
 npx skills add bitmovin/skills --skill bitmovin-player-web
-npx skills add bitmovin/skills --skill bitmovin-player-android
 
 # Install to specific agents
 npx skills add bitmovin/skills --skill bitmovin-player-web -a claude-code -a codex
@@ -82,7 +78,6 @@ For a home-local Codex plugin install, copy the plugin and marketplace entry int
 ```bash
 mkdir -p ~/.agents/plugins ~/plugins
 cp -R plugins/bitmovin-player-web ~/plugins/bitmovin-player-web
-cp -R plugins/bitmovin-player-android ~/plugins/bitmovin-player-android
 cp .agents/plugins/marketplace.json ~/.agents/plugins/marketplace.json
 ```
 
