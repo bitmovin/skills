@@ -139,20 +139,6 @@ produces fmp4 with HLS-only manifests using a hardware-accelerated
 preset. The rendered YAML is plain text — feel free to hand-edit before
 submitting.
 
-### Out of scope
-
-The prebaked templates do not cover DRM, HDR / Dolby Vision, SCTE-35 /
-ESAM, ad insertion, multi-period DASH, captions/subtitles, filters, VP9,
-concatenation, custom infrastructure (BYOC), or standby pools.
-
-The custom-build flow (option 5 in scenario picking) can attempt some
-of these — the rulebook covers the cross-field constraints for DRM,
-Dolby Vision, hardware encoding, sprites, thumbnails, encoding modes,
-and per-title bitrate algebra — but the skill does not yet author the
-YAML for sprites, subtitles, filters, SCTE-35, concatenation, or
-multi-period DASH. For those, point users at
-https://developer.bitmovin.com/encoding/docs.
-
 ## Security notes
 
 - Credentials (Bitmovin API key, output access/secret keys) are read

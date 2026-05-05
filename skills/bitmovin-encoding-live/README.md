@@ -127,13 +127,6 @@ All three produce CMAF-style output (fmp4 muxings serving DASH and HLS) with
 `manifestGenerator: V2`. The rendered YAML is plain text — feel free to
 hand-edit before submitting.
 
-## Out of scope
-
-DRM, SCTE-35/ESAM, ad insertion, live content insertion, multi-period DASH,
-captions/subtitles, custom infrastructure (BYOC), and standby pools are out
-of scope for this skill. See https://developer.bitmovin.com/encoding/docs
-for those topics.
-
 ## Security notes
 
 - Credentials (Bitmovin API key, output access/secret keys) are read from

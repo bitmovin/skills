@@ -152,10 +152,6 @@ When you ask an agent to start a Bitmovin live encoding, the skill:
 
 CMAF output (fmp4 muxings serving DASH and HLS, `manifestGenerator: V2`); RTMP / RTMPS / SRT ingest; AWS / GCP / Azure cloud regions; S3 / GCS outputs (reuse or create); per-encoding stream key (RTMP) or host:port (SRT); ACL choices (PUBLIC_READ / PRIVATE / NONE); auto-shutdown on stream loss / no bytes read; STABLE vs BETA encoder.
 
-### Out of scope
-
-DRM, SCTE-35 / ESAM, ad insertion, live content insertion, multi-period DASH, captions/subtitles, custom infrastructure (BYOC), and standby pools. The skill points users at https://developer.bitmovin.com/encoding/docs for those.
-
 ## Skill: bitmovin-encoding-vod
 
 When you ask an agent to run a Bitmovin VOD encoding, the skill:
@@ -170,10 +166,6 @@ When you ask an agent to run a Bitmovin VOD encoding, the skill:
 ### What's covered
 
 H.264 (per-title and fixed-ladder, SINGLE_PASS / TWO_PASS / THREE_PASS) and AV1 per-title; CMAF fmp4 (DASH + HLS) for the H.264 templates; progressive MP4 for AV1 UGC; HLS-only with explicit per-rendition manifest config for the sports-clips hardware template; HTTP / HTTPS / S3 / GCS / Azure inputs (creation only for HTTP/HTTPS); S3 / GCS outputs (reuse or create); ACL choices (PUBLIC_READ / PRIVATE / NONE) with scenario-aware defaults.
-
-### Out of scope
-
-DRM, HDR / Dolby Vision, SCTE-35 / ESAM, ad insertion, multi-period DASH, captions/subtitles, filters, VP9, concatenation, custom infrastructure (BYOC), and standby pools. The skill points users at https://developer.bitmovin.com/encoding/docs for those.
 
 ## Other Hosts
 

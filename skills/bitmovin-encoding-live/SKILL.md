@@ -645,20 +645,6 @@ For an ad-hoc status check at any point, use the CLI directly:
 bitmovin encoding jobs status "$ENCODING_ID"
 ```
 
-## Out of scope (point users at docs)
-
-- DRM (Widevine, PlayReady, FairPlay)
-- SCTE-35 / ESAM signal processing
-- Ad insertion
-- Live content insertion (mid-roll VOD splicing)
-- Multi-period DASH
-- Captions and subtitles (DVB, CEA-608/708, SRT subtitle, WebVTT)
-- Custom infrastructure (BYOC, role-based AWS, Azure, OCI)
-- Standby pools
-
-For any of these, link the user to https://developer.bitmovin.com/encoding/docs
-and stop. Do not extend this skill inline.
-
 ## Safety Rules
 
 - Never log `BITMOVIN_API_KEY`, `BITMOVIN_OUTPUT_ACCESS_KEY`,

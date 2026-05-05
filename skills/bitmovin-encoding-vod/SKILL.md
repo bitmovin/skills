@@ -498,26 +498,6 @@ For an ad-hoc status check at any point, use the CLI directly:
 bitmovin encoding jobs status "$ENCODING_ID"
 ```
 
-## Out of scope (point users at docs)
-
-- DRM (Widevine, PlayReady, FairPlay) and SPEKE
-- HDR / Dolby Vision conversions
-- SCTE-35 / ESAM / server-side ad insertion
-- Multi-period DASH
-- Captions and subtitles (CEA-608/708, WebVTT, IMSC)
-- Filters (watermark, scale, crop, text overlay)
-- VP9 codec (AV1 is supported via `av1-per-title-ugc`)
-- Concatenation of multiple inputs
-- Per-Title with manual ladder anchors beyond the single 1080p anchor
-
-The custom-build flow (Step 2b) can attempt some of these — the
-rulebook covers cross-field constraints for DRM, Dolby Vision,
-hardware encoding, sprites, thumbnails, encoding modes, and per-title
-bitrate algebra — but the skill does not yet author the YAML for
-sprites, subtitles, filters, SCTE-35, concatenation, or multi-period
-DASH. For those, link the user to https://developer.bitmovin.com/encoding/docs
-and stop. Do not extend this skill inline.
-
 ## Safety Rules
 
 - Never log `BITMOVIN_API_KEY`, `BITMOVIN_OUTPUT_ACCESS_KEY`,
