@@ -4,15 +4,17 @@
 # --- required for every template -------------------------------------------
 encodingName: my-vod-test
 
-# Input source. Always reference by id — the skill creates HTTP/HTTPS
-# inputs for you on the fly via scripts/create_input.py and reuses
-# everything else (S3, GCS, Azure, …) via scripts/list_inputs.py.
+# Input source. Always reference by id — the skill creates HTTPS inputs
+# for you on the fly via `bitmovin encoding inputs create https` and
+# reuses everything else (S3, GCS, Azure, …) via
+# `bitmovin encoding inputs list`.
 inputId: 00000000-0000-0000-0000-000000000000
 # Path to the input file *inside* the input source. For HTTP/HTTPS, this
 # is the URL path component. For S3/GCS, the object key.
 inputPath: /sintel/sintel.mp4
 
-# Output created in advance via scripts/create_output.py or scripts/list_outputs.py.
+# Output created in advance via `bitmovin encoding outputs create s3` /
+# `... create gcs`, or picked from `bitmovin encoding outputs list`.
 outputId: 00000000-0000-0000-0000-000000000000
 
 # Path prefix inside the output bucket. Trailing slash optional; the
