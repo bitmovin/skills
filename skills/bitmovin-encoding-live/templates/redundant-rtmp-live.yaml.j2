@@ -11,12 +11,29 @@ inputs:
       properties:
         name: {{ encodingName }} redundant RTMP input
         staticIngestPoints:
+          # When the *StreamKeyId params are set (Step 4b pre-created or
+          # reused), ASSIGN the concrete UUIDs — the user picked the
+          # values, the ingest URL is predictable across re-runs.
+          # Otherwise (`streamKeyMode: Auto-generate`) let the API mint
+          # fresh random keys, surfaced via `bitmovin encoding jobs live`.
+          # Inline `live.streamKeys` + `$/...` refs are NOT resolved by
+          # the current Templates API — that's why Step 4b uses curl.
           - name: Primary ingest point
             streamKeyConfiguration:
+{% if primaryStreamKeyId is defined and primaryStreamKeyId %}
+              type: ASSIGN
+              streamKeyId: {{ primaryStreamKeyId }}
+{% else %}
               type: GENERATE
+{% endif %}
           - name: Backup ingest point
             streamKeyConfiguration:
+{% if backupStreamKeyId is defined and backupStreamKeyId %}
+              type: ASSIGN
+              streamKeyId: {{ backupStreamKeyId }}
+{% else %}
               type: GENERATE
+{% endif %}
 
 configurations:
   video:
@@ -96,7 +113,12 @@ encodings:
     live:
       start:
         properties:
-          streamKey: {{ streamKey }}
+          # `live.start.streamKey` is required by the schema but does not
+          # drive ingest when `staticIngestPoints` are configured (the
+          # actual keys come from the `live.streamKeys` block above and
+          # are wired via `streamKeyConfiguration: ASSIGN` per ingest
+          # point). Set it to the user value anyway for parity / readability.
+          streamKey: {{ streamKey | default('bitmovin') }}
           manifestGenerator: V2
           autoShutdownConfiguration:
             streamTimeoutMinutes: {{ autoShutdownStreamTimeoutMin | default(30) }}

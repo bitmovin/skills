@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
-# Print the path of a Python interpreter that has the skill's runtime +
-# validation deps (bitmovin_api_sdk, yaml, jinja2, jsonschema) importable.
-# `jsonschema` powers the local Encoding Template schema pre-flight, so this
-# helper may install it into the dedicated venv even when the core runtime
-# deps are already present in the user's `python3`.
+# Print the path of a Python interpreter that has the skill's runtime deps
+# (yaml, jinja2) importable. Used by the inline Jinja render block in
+# SKILL.md (Step 5).
+#
+# All other workflow steps — schema validation, template submission, status
+# polling, ingest details, stop — are driven by the Bitmovin CLI directly,
+# so the venv no longer needs bitmovin_api_sdk or jsonschema.
 #
 # 1. If the user's `python3` already has them, print `python3`.
 # 2. Otherwise, create / reuse a dedicated venv at
@@ -20,8 +22,8 @@ set -euo pipefail
 
 CACHE_ROOT="${BITMOVIN_LIVE_SKILL_CACHE:-$HOME/.cache/bitmovin/bitmovin-encoding-live}"
 VENV_DIR="$CACHE_ROOT/.venv"
-PROBE='import bitmovin_api_sdk, yaml, jinja2, jsonschema'
-DEPS=(bitmovin-api-sdk pyyaml jinja2 jsonschema)
+PROBE='import yaml, jinja2'
+DEPS=(pyyaml jinja2)
 
 log() { printf '%s\n' "$*" >&2; }
 

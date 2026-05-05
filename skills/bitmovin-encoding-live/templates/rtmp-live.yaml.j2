@@ -16,9 +16,24 @@ inputs:
       properties:
         name: {{ encodingName }} RTMP input
         staticIngestPoints:
+          # When `mainStreamKeyId` is set (Step 4b pre-created or reused
+          # a stream key) we ASSIGN that concrete UUID — the user picked
+          # the value, the ingest URL is predictable. Otherwise the
+          # workflow chose `streamKeyMode: Auto-generate` and we let the
+          # API mint a fresh random key (surfaced via
+          # `bitmovin encoding jobs live` after RUNNING).
+          # Inline declaration via top-level `live.streamKeys` +
+          # `streamKeyId: $/live/streamKeys/<id>` does NOT resolve in
+          # the current Templates API — that's why Step 4b uses a
+          # separate REST call.
           - name: Main ingest point
             streamKeyConfiguration:
+{% if mainStreamKeyId is defined and mainStreamKeyId %}
+              type: ASSIGN
+              streamKeyId: {{ mainStreamKeyId }}
+{% else %}
               type: GENERATE
+{% endif %}
 
 configurations:
   video:
@@ -98,7 +113,12 @@ encodings:
     live:
       start:
         properties:
-          streamKey: {{ streamKey }}
+          # `live.start.streamKey` is required by the schema but does not
+          # drive ingest when `staticIngestPoints` are configured (the
+          # actual key comes from the `live.streamKeys.main-stream-key`
+          # block above and is wired via `streamKeyConfiguration: ASSIGN`).
+          # Set it to the user value anyway for parity / readability.
+          streamKey: {{ streamKey | default('bitmovin') }}
           manifestGenerator: V2
           autoShutdownConfiguration:
             streamTimeoutMinutes: {{ autoShutdownStreamTimeoutMin | default(30) }}
