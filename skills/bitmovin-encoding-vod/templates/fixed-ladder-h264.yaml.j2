@@ -1,0 +1,140 @@
+{# Bitmovin Encoding Template — H.264 fixed bitrate-ladder VOD encoding
+   with fmp4 muxings and default DASH + HLS manifests.
+
+   Use this when you already know the renditions you want. The codec
+   ladder is taken straight from `videoLadder` in the params file
+   (each entry is a {height, bitrate} pair).
+
+   Compared to per-title:
+   - simpler / predictable output sizes
+   - faster encode (no analysis pass)
+   - less optimal for diverse content (you tuned the ladder, not the encoder) #}
+metadata:
+  type: VOD
+  name: {{ encodingName }}
+
+{% set _outputBase = (outputBasePath | default('')).rstrip('/') %}
+{% set outputBasePathPrefix = (_outputBase ~ '/') if _outputBase else '' %}
+
+configurations:
+  video:
+    h264:
+{% for r in videoLadder %}
+      v-{{ r.height }}p:
+        properties:
+          name: {{ encodingName }} h264 {{ r.height }}p
+          profile: MAIN
+          height: {{ r.height }}
+          bitrate: {{ r.bitrate }}
+{% endfor %}
+  audio:
+    aac:
+      a-aac:
+        properties:
+          name: {{ encodingName }} AAC
+          channelLayout: STEREO
+          bitrate: {{ audioBitrate | default(128000) }}
+          rate: 48000.0
+
+encodings:
+  main-encoding:
+    properties:
+      name: {{ encodingName }}
+      encoderVersion: {{ encoderVersion | default('STABLE') }}
+
+    streams:
+{% for r in videoLadder %}
+      s-{{ r.height }}p:
+        properties:
+          inputStreams:
+            - inputId: {{ inputId }}
+              inputPath: {{ inputPath }}
+              selectionMode: AUTO
+          codecConfigId: $/configurations/video/h264/v-{{ r.height }}p
+          mode: STANDARD
+{% endfor %}
+      s-audio:
+        properties:
+          inputStreams:
+            - inputId: {{ inputId }}
+              inputPath: {{ inputPath }}
+              selectionMode: AUTO
+          codecConfigId: $/configurations/audio/aac/a-aac
+          mode: STANDARD
+
+    muxings:
+      fmp4:
+{% for r in videoLadder %}
+        m-{{ r.height }}p:
+          properties:
+            name: video {{ r.height }}p fmp4
+            streams:
+              - streamId: $/encodings/main-encoding/streams/s-{{ r.height }}p
+            outputs:
+              - outputId: {{ outputId }}
+                outputPath: "{{ outputBasePathPrefix }}video/{{ r.height }}p/"
+                acl:
+                  - permission: {{ outputAcl | default('PUBLIC_READ') }}
+            initSegmentName: init.mp4
+            segmentLength: {{ segmentLength | default(4.0) }}
+            segmentNaming: "seg_%number%.m4s"
+{% endfor %}
+        m-audio:
+          properties:
+            name: audio fmp4
+            streams:
+              - streamId: $/encodings/main-encoding/streams/s-audio
+            outputs:
+              - outputId: {{ outputId }}
+                outputPath: "{{ outputBasePathPrefix }}audio/{{ audioBitrate | default(128000) }}/"
+                acl:
+                  - permission: {{ outputAcl | default('PUBLIC_READ') }}
+            initSegmentName: init.mp4
+            segmentLength: {{ segmentLength | default(4.0) }}
+            segmentNaming: "seg_%number%.m4s"
+
+    start:
+      properties:
+        encodingMode: {{ encodingMode | default('SINGLE_PASS') }}
+        manifestGenerator: V2
+{% if 'dash' in manifests %}
+        vodDashManifests:
+          - manifestId: $/manifests/dash/defaultapi/default-dash
+{% endif %}
+{% if 'hls' in manifests %}
+        vodHlsManifests:
+          - manifestId: $/manifests/hls/defaultapi/default-hls
+{% endif %}
+
+manifests:
+{% if 'dash' in manifests %}
+  dash:
+    defaultapi:
+      default-dash:
+        properties:
+          encodingId: $/encodings/main-encoding
+          name: {{ encodingName }} default DASH
+          manifestName: manifest.mpd
+          profile: ON_DEMAND
+          outputs:
+            - outputId: {{ outputId }}
+              outputPath: "{{ outputBasePathPrefix }}"
+              acl:
+                - permission: {{ outputAcl | default('PUBLIC_READ') }}
+          generatorVersion: V2
+{% endif %}
+{% if 'hls' in manifests %}
+  hls:
+    defaultapi:
+      default-hls:
+        properties:
+          encodingId: $/encodings/main-encoding
+          name: {{ encodingName }} default HLS
+          manifestName: master.m3u8
+          outputs:
+            - outputId: {{ outputId }}
+              outputPath: "{{ outputBasePathPrefix }}"
+              acl:
+                - permission: {{ outputAcl | default('PUBLIC_READ') }}
+          generatorVersion: V2
+{% endif %}

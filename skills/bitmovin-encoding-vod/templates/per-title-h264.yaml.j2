@@ -1,0 +1,160 @@
+{# Bitmovin Encoding Template — H.264 Per-Title VOD encoding with fmp4
+   muxings, default DASH + HLS manifests.
+
+   Per-Title automatically generates an optimal bitrate ladder per input
+   based on its complexity. The template provides one bare h264 codec
+   config (`v-h264`, the per-title "template") and one fixed-resolution
+   anchor (`v-h264-1080p`) so the algorithm always produces at least a
+   1080p rendition when the input supports it. #}
+metadata:
+  type: VOD
+  name: {{ encodingName }}
+
+{% set _outputBase = (outputBasePath | default('')).rstrip('/') %}
+{% set outputBasePathPrefix = (_outputBase ~ '/') if _outputBase else '' %}
+
+configurations:
+  video:
+    h264:
+      v-h264:
+        properties:
+          name: {{ encodingName }} h264 per-title template
+          profile: MAIN
+      v-h264-1080p:
+        properties:
+          name: {{ encodingName }} h264 per-title 1080p anchor
+          profile: MAIN
+          height: 1080
+  audio:
+    aac:
+      a-aac:
+        properties:
+          name: {{ encodingName }} AAC
+          channelLayout: STEREO
+          bitrate: {{ audioBitrate | default(128000) }}
+          rate: 48000.0
+
+encodings:
+  main-encoding:
+    properties:
+      name: {{ encodingName }}
+      encoderVersion: {{ encoderVersion | default('STABLE') }}
+
+    streams:
+      s-video:
+        properties:
+          inputStreams:
+            - inputId: {{ inputId }}
+              inputPath: {{ inputPath }}
+              selectionMode: AUTO
+          codecConfigId: $/configurations/video/h264/v-h264
+          mode: PER_TITLE_TEMPLATE
+      s-video-1080p:
+        properties:
+          inputStreams:
+            - inputId: {{ inputId }}
+              inputPath: {{ inputPath }}
+              selectionMode: AUTO
+          codecConfigId: $/configurations/video/h264/v-h264-1080p
+          mode: PER_TITLE_TEMPLATE_FIXED_RESOLUTION
+      s-audio:
+        properties:
+          inputStreams:
+            - inputId: {{ inputId }}
+              inputPath: {{ inputPath }}
+              selectionMode: AUTO
+          codecConfigId: $/configurations/audio/aac/a-aac
+          mode: STANDARD
+
+    muxings:
+      fmp4:
+        m-video:
+          properties:
+            name: video per-title fmp4
+            streamConditionsMode: DROP_MUXING
+            streams:
+              - streamId: $/encodings/main-encoding/streams/s-video
+            outputs:
+              - outputId: {{ outputId }}
+                outputPath: "{{ outputBasePathPrefix }}video/{width}_{bitrate}_{uuid}/"
+                acl:
+                  - permission: {{ outputAcl | default('PUBLIC_READ') }}
+            initSegmentName: init.mp4
+            segmentLength: {{ segmentLength | default(4.0) }}
+            segmentNaming: "seg_%number%.m4s"
+        m-video-1080p:
+          properties:
+            name: video per-title 1080p fmp4
+            streamConditionsMode: DROP_MUXING
+            streams:
+              - streamId: $/encodings/main-encoding/streams/s-video-1080p
+            outputs:
+              - outputId: {{ outputId }}
+                outputPath: "{{ outputBasePathPrefix }}video/{bitrate}_{uuid}/"
+                acl:
+                  - permission: {{ outputAcl | default('PUBLIC_READ') }}
+            initSegmentName: init.mp4
+            segmentLength: {{ segmentLength | default(4.0) }}
+            segmentNaming: "seg_%number%.m4s"
+        m-audio:
+          properties:
+            name: audio fmp4
+            streams:
+              - streamId: $/encodings/main-encoding/streams/s-audio
+            outputs:
+              - outputId: {{ outputId }}
+                outputPath: "{{ outputBasePathPrefix }}audio/{{ audioBitrate | default(128000) }}/"
+                acl:
+                  - permission: {{ outputAcl | default('PUBLIC_READ') }}
+            initSegmentName: init.mp4
+            segmentLength: {{ segmentLength | default(4.0) }}
+            segmentNaming: "seg_%number%.m4s"
+
+    start:
+      properties:
+        encodingMode: THREE_PASS
+        manifestGenerator: V2
+        perTitle:
+          h264Configuration:
+            autoRepresentations: {}
+{% if 'dash' in manifests %}
+        vodDashManifests:
+          - manifestId: $/manifests/dash/defaultapi/default-dash
+{% endif %}
+{% if 'hls' in manifests %}
+        vodHlsManifests:
+          - manifestId: $/manifests/hls/defaultapi/default-hls
+{% endif %}
+
+manifests:
+{% if 'dash' in manifests %}
+  dash:
+    defaultapi:
+      default-dash:
+        properties:
+          encodingId: $/encodings/main-encoding
+          name: {{ encodingName }} default DASH
+          manifestName: manifest.mpd
+          profile: ON_DEMAND
+          outputs:
+            - outputId: {{ outputId }}
+              outputPath: "{{ outputBasePathPrefix }}"
+              acl:
+                - permission: {{ outputAcl | default('PUBLIC_READ') }}
+          generatorVersion: V2
+{% endif %}
+{% if 'hls' in manifests %}
+  hls:
+    defaultapi:
+      default-hls:
+        properties:
+          encodingId: $/encodings/main-encoding
+          name: {{ encodingName }} default HLS
+          manifestName: master.m3u8
+          outputs:
+            - outputId: {{ outputId }}
+              outputPath: "{{ outputBasePathPrefix }}"
+              acl:
+                - permission: {{ outputAcl | default('PUBLIC_READ') }}
+          generatorVersion: V2
+{% endif %}
