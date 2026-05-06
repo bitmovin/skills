@@ -93,11 +93,31 @@ Build player config explicitly and keep it centralized:
   - audio becoming noisy handling
 - Remote control / cast config where needed
 
+### 2a) License request denied triage runbook
+
+When Bitmovin license requests are denied, check this first:
+
+1. Confirm the runtime `applicationId` (including flavor/build suffixes).
+2. Verify that app ID is allowlisted for the license key.
+3. Verify the exact key passed into `PlayerConfig`.
+
 ### 3) Compose + `PlayerView` integration
 
-- Use `Player` + `PlayerView` in Compose via `AndroidView` pattern.
-- Bind lifecycle correctly (start/resume/pause/stop/destroy) for both player and view.
-- Prevent leaks by disposing player/view/session cleanly.
+- Use `Player` + `PlayerView` in Compose via `AndroidView`.
+- Bind lifecycle correctly (start/resume/pause/stop/destroy) for player and view.
+- Dispose player/view/session cleanly.
+
+State/lifecycle rules:
+
+- Keep `Player` instances stable across recompositions (`remember`, stable keys).
+- UI mode/layout toggles should rebind UI, not recreate players.
+- Avoid implicit restart/seek-to-start when switching modes.
+
+Avoid:
+
+- Creating players from transient UI state.
+- Coupling player identity to frequently toggled flags.
+- Re-initializing source/player during recomposition without a real playback-context change.
 
 ### 4) Custom Bitmovin Web UI + native↔JS bridge
 
