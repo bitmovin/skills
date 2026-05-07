@@ -99,6 +99,15 @@ A local Codex marketplace entry looks like:
 }
 ```
 
+## Hosting (`bitmovin.com/skill`)
+
+A Cloudflare Worker under [`worker/`](worker/) serves the hub skill at `bitmovin.com/skill` with content negotiation:
+- Browsers (`Accept: text/html`) get a landing page with the `npx @bitmovin/skills` install command.
+- AI agents and `curl`/`wget` get raw markdown.
+- `bitmovin.com/skill.md` always returns markdown.
+
+See [`worker/README.md`](worker/README.md) for deploy steps. The Worker bundles `skills/bitmovin/SKILL.md` at deploy time, so updating the hosted skill requires `wrangler deploy`.
+
 ## Repo Layout
 
 - `skills/<skill-name>/SKILL.md`: the portable skill content (one directory per skill)
@@ -107,6 +116,8 @@ A local Codex marketplace entry looks like:
 - `plugins/<skill-name>/.codex-plugin/plugin.json`: Codex plugin metadata (one per skill)
 - `plugins/<skill-name>/skills/<skill-name>/SKILL.md`: symlink to the shared root skill
 - `.agents/plugins/marketplace.json`: Codex marketplace metadata
+- `worker/`: Cloudflare Worker that serves the hub skill at `bitmovin.com/skill`
+- `bin/`, `src/`: `@bitmovin/skills` npx wizard sources
 
 ## Skill: bitmovin-player-web
 
