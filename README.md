@@ -21,6 +21,18 @@ This repo is intentionally **not tied to Claude Code only**:
 
 The sections below describe install paths shared by all skills in this repo. Skill-specific details live inside each skill's directory.
 
+## Quick Install With npx (any AI tool)
+
+For the hub `bitmovin` skill — the one-prompt entry point that introduces every Bitmovin product and walks through MCP/CLI/SDK setup — run:
+
+```bash
+npx @bitmovin/skills
+```
+
+The wizard detects which AI tool you're using (Claude Code, Cursor, Windsurf, GitHub Copilot, OpenAI Codex, …) and installs the skill into the right location. Pass `--target <name>` to skip the prompt or `--list-targets` to see the full list. Source: [`bin/cli.js`](bin/cli.js).
+
+The wizard fetches the canonical skill content from `https://bitmovin.com/skill` so updates to the hosted skill propagate to existing installs without republishing the package.
+
 ## Install In Claude Code
 
 ```bash
