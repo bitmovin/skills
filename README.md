@@ -13,6 +13,7 @@ This repo is intentionally **not tied to Claude Code only**:
 
 | Skill | Status | What it covers |
 | --- | --- | --- |
+| [`bitmovin`](skills/bitmovin/SKILL.md) | Available | Hub skill — routes to all Bitmovin products and walks through MCP/CLI/SDK setup. Hosted at `bitmovin.com/skill`. |
 | [`bitmovin-player-web`](skills/bitmovin-player-web/SKILL.md) | Available | Bitmovin Web Player SDK — Player v8 (stable) and Player Web X / PWX (next-gen) |
 | `bitmovin-encoding-vod` | Planned | VOD encoding with the Bitmovin Encoding API |
 | `bitmovin-encoding-live` | Planned | Live encoding with the Bitmovin Encoding API |
