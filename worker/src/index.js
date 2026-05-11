@@ -46,16 +46,17 @@ function wantsHtml(request) {
   if (fmt === 'md' || fmt === 'markdown' || fmt === 'raw') return false;
   if (fmt === 'html') return true;
 
+  // Explicit Accept header wins over UA sniffing.
   const accept = (request.headers.get('accept') || '').toLowerCase();
-  const ua = (request.headers.get('user-agent') || '').toLowerCase();
+  if (accept.includes('text/markdown')) return false;
+  if (accept.includes('text/html')) return true;
 
+  // No explicit preference — sniff the UA. CLI clients and agent libraries
+  // get markdown; everything ambiguous defaults to markdown too.
+  const ua = (request.headers.get('user-agent') || '').toLowerCase();
   if (/curl|wget|node-fetch|undici|python-requests|httpx|^go-http-client|libwww-perl|fetch|axios/.test(ua)) {
     return false;
   }
-
-  if (accept.includes('text/markdown')) return false;
-
-  if (accept.includes('text/html')) return true;
 
   return false;
 }

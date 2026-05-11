@@ -1,7 +1,7 @@
 name = "bitmovin-skill"
 main = "src/index.js"
 compatibility_date = "2026-04-01"
-workers_dev = false
+workers_dev = true
 
 # Bundle SKILL.md as text into the Worker at build time. The canonical
 # source lives at skills/bitmovin/SKILL.md and is imported via relative path.
@@ -10,20 +10,31 @@ type = "Text"
 globs = ["**/*.md"]
 fallthrough = true
 
-# Routes are commented out by default — uncomment and adjust the zone after
-# the worker is created in the Cloudflare account.
-#
-# [[routes]]
-# pattern = "bitmovin.com/skill"
-# zone_name = "bitmovin.com"
-#
-# [[routes]]
-# pattern = "bitmovin.com/skill/*"
-# zone_name = "bitmovin.com"
-#
-# [[routes]]
-# pattern = "bitmovin.com/skill.md"
-# zone_name = "bitmovin.com"
+# Cloudflare matches routes against the full URL (path + query string), so
+# the bare path alone does not catch e.g. `/skill?format=html`. We register
+# both `/skill` and `/skill?*` variants. The WAF Skip Rule on the
+# bitmovin.com zone scopes by `http.request.uri.path`, which excludes the
+# query string, so it already covers all variants — no Skip Rule changes
+# are required alongside these patterns.
+[[routes]]
+pattern = "bitmovin.com/skill"
+zone_name = "bitmovin.com"
+
+[[routes]]
+pattern = "bitmovin.com/skill?*"
+zone_name = "bitmovin.com"
+
+[[routes]]
+pattern = "bitmovin.com/skill/*"
+zone_name = "bitmovin.com"
+
+[[routes]]
+pattern = "bitmovin.com/skill.md"
+zone_name = "bitmovin.com"
+
+[[routes]]
+pattern = "bitmovin.com/skill.md?*"
+zone_name = "bitmovin.com"
 
 [observability]
 enabled = true
