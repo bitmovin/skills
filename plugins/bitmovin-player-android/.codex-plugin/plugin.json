@@ -4,10 +4,10 @@
   "description": "Portable Bitmovin Android Player SDK integration skill packaged for Codex as a local plugin.",
   "author": {
     "name": "Bitmovin",
-    "url": "https://github.com/bitmovin/bitmovin-player-skill"
+    "url": "https://github.com/bitmovin/skills"
   },
-  "homepage": "https://github.com/bitmovin/bitmovin-player-skill",
-  "repository": "https://github.com/bitmovin/bitmovin-player-skill",
+  "homepage": "https://github.com/bitmovin/skills",
+  "repository": "https://github.com/bitmovin/skills",
   "license": "MIT",
   "keywords": [
     "bitmovin",
@@ -33,7 +33,7 @@
       "Read",
       "Write"
     ],
-    "websiteURL": "https://github.com/bitmovin/bitmovin-player-skill",
+    "websiteURL": "https://github.com/bitmovin/skills",
     "defaultPrompt": [
       "Add Bitmovin Android Player SDK to this app",
       "Integrate PiP, media session, and cast with Bitmovin Android",
