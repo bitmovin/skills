@@ -1,0 +1,43 @@
+{
+  "name": "bitmovin",
+  "version": "0.1.0",
+  "description": "Hub skill for Bitmovin video infrastructure. Routes to Player, Encoding, Observability, AI Scene Analysis, Streams, and Stream Lab; walks through MCP/CLI/SDK setup.",
+  "author": {
+    "name": "Bitmovin",
+    "url": "https://github.com/bitmovin/skills"
+  },
+  "homepage": "https://github.com/bitmovin/skills",
+  "repository": "https://github.com/bitmovin/skills",
+  "license": "MIT",
+  "keywords": [
+    "bitmovin",
+    "video",
+    "streaming",
+    "encoding",
+    "player",
+    "observability",
+    "analytics",
+    "mcp",
+    "codex-plugin"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Bitmovin",
+    "shortDescription": "Hub skill for all Bitmovin video infrastructure products",
+    "longDescription": "Adds a top-level Bitmovin routing skill to Codex covering Player, VOD/Live Encoding, Observability, AI Scene Analysis, Streams, and Stream Lab, plus MCP server, CLI, and SDK setup across Claude Code, Cursor, Windsurf, GitHub Copilot, and other AI tools.",
+    "developerName": "Bitmovin",
+    "category": "Coding",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/bitmovin/skills",
+    "defaultPrompt": [
+      "Learn about Bitmovin",
+      "Set up Bitmovin in this project",
+      "Connect the Bitmovin MCP server"
+    ],
+    "brandColor": "#1730E7"
+  }
+}
