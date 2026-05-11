@@ -1,11 +1,13 @@
 import { existsSync } from 'node:fs';
 import { mkdir, writeFile } from 'node:fs/promises';
+import { createRequire } from 'node:module';
 import { homedir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { createInterface } from 'node:readline/promises';
 import { stdin, stdout } from 'node:process';
 
 const SKILL_URL = process.env.BITMOVIN_SKILL_URL || 'https://bitmovin.com/skill';
+const FETCH_TIMEOUT_MS = 15_000;
 
 const c = {
   bold: (s) => `\x1b[1m${s}\x1b[0m`,
@@ -122,7 +124,21 @@ function listTargets() {
 }
 
 async function fetchSkill() {
-  const res = await fetch(SKILL_URL, { headers: { Accept: 'text/markdown, text/plain;q=0.9' } });
+  let res;
+  try {
+    res = await fetch(SKILL_URL, {
+      headers: { Accept: 'text/markdown, text/plain;q=0.9' },
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+    });
+  } catch (err) {
+    if (err.name === 'TimeoutError' || err.name === 'AbortError') {
+      throw new Error(
+        `Timed out after ${FETCH_TIMEOUT_MS}ms fetching skill from ${SKILL_URL}. ` +
+        `Check connectivity or override the source with BITMOVIN_SKILL_URL.`,
+      );
+    }
+    throw new Error(`Network error fetching ${SKILL_URL}: ${err.message}`);
+  }
   if (!res.ok) {
     throw new Error(
       `Failed to fetch skill from ${SKILL_URL} (HTTP ${res.status}). ` +
@@ -143,13 +159,14 @@ async function chooseTarget(rl, preselected) {
   }
 
   const entries = Object.entries(TARGETS);
-  const detectedIdx = entries.findIndex(([, t]) => t.detect && t.detect());
+  const detected = entries.map(([, t]) => Boolean(t.detect && t.detect()));
+  const detectedIdx = detected.indexOf(true);
 
   stdout.write(`\n${c.bold('Where should I install the Bitmovin skill?')}\n\n`);
-  entries.forEach(([key, t], i) => {
-    const detected = t.detect && t.detect() ? c.green(' [detected]') : '';
+  entries.forEach(([, t], i) => {
+    const tag = detected[i] ? c.green(' [detected]') : '';
     const star = i === detectedIdx ? c.cyan('*') : ' ';
-    stdout.write(`  ${star} ${String(i + 1).padStart(2)}. ${t.label}${detected}\n`);
+    stdout.write(`  ${star} ${String(i + 1).padStart(2)}. ${t.label}${tag}\n`);
   });
   stdout.write('\n');
 
@@ -173,7 +190,8 @@ export async function run(argv) {
 
   if (args.flags.help) return printHelp();
   if (args.flags.version) {
-    const { version } = await import('../package.json', { with: { type: 'json' } }).then((m) => m.default);
+    const require = createRequire(import.meta.url);
+    const { version } = require('../package.json');
     stdout.write(`${version}\n`);
     return;
   }
