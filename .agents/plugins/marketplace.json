@@ -17,6 +17,18 @@
       "category": "Coding"
     },
     {
+      "name": "bitmovin-player-android",
+      "source": {
+        "source": "local",
+        "path": "./plugins/bitmovin-player-android"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Coding"
+    },
+    {
       "name": "bitmovin-encoding-live",
       "source": {
         "source": "local",

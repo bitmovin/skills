@@ -1,0 +1,44 @@
+{
+  "name": "bitmovin-player-android",
+  "version": "0.1.0",
+  "description": "Portable Bitmovin Android Player SDK integration skill packaged for Codex as a local plugin.",
+  "author": {
+    "name": "Bitmovin",
+    "url": "https://github.com/bitmovin/skills"
+  },
+  "homepage": "https://github.com/bitmovin/skills",
+  "repository": "https://github.com/bitmovin/skills",
+  "license": "MIT",
+  "keywords": [
+    "bitmovin",
+    "android",
+    "player-sdk",
+    "video",
+    "streaming",
+    "hls",
+    "dash",
+    "pip",
+    "cast",
+    "codex-plugin"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Bitmovin Player Android",
+    "shortDescription": "Integrate Bitmovin Android Player SDK correctly in Android apps",
+    "longDescription": "Adds a reusable Bitmovin Android Player SDK workflow to Codex, covering setup, player lifecycle, explicit source typing with SourceConfig.fromUrl fallback, Web UI handlers, media session, cast, and TV variants.",
+    "developerName": "Bitmovin",
+    "category": "Coding",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/bitmovin/skills",
+    "defaultPrompt": [
+      "Add Bitmovin Android Player SDK to this app",
+      "Integrate PiP, media session, and cast with Bitmovin Android",
+      "Fix this Bitmovin Android Player integration issue"
+    ],
+    "brandColor": "#1730E7"
+  }
+}
