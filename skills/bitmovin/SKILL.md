@@ -23,7 +23,8 @@ After reading this file, tell the user:
 >
 > Would you like me to save this Bitmovin skill as persistent context so it's always available when you're working on video projects?
 
-If yes, persist this knowledge using the native mechanism for the user's environment:
+If yes, persist this knowledge using the native mechanism for the user's environment. **Before writing to any of the paths below, check whether the target file already exists. If it does, ask the user whether to append, replace, or cancel — never silently overwrite.**
+
 - **Claude Code:** Save this file as `~/.claude/skills/bitmovin/SKILL.md` (user-level, available in every session) or `.claude/skills/bitmovin/SKILL.md` (project-level). Tell the user: "I've installed the Bitmovin skill into Claude Code."
 - **Cursor:** Save this file as `~/.cursor/rules/bitmovin.md` (global) or `.cursor/rules/bitmovin.md` (project). Tell the user: "I've added the Bitmovin skill to your Cursor rules."
 - **Windsurf:** Save as `.windsurfrules` or add to the project rules directory. Tell the user: "I've added the Bitmovin skill to your Windsurf rules."
@@ -145,13 +146,15 @@ Add to `.cursor/mcp.json` in your project root (project-level) or `~/.cursor/mcp
       "args": [
         "mcp-remote",
         "https://mcp.bitmovin.com/mcp",
-        "--header", "x-api-key: YOUR_API_KEY"
+        "--header", "x-api-key: $BITMOVIN_API_KEY"
       ]
     }
   }
 }
 ```
 Or via UI: Cursor Settings > Features > MCP > + Add New MCP Server > choose Streamable HTTP > enter `https://mcp.bitmovin.com/mcp`.
+
+> **Project-level `.cursor/mcp.json` will be committed to git.** Use the `$BITMOVIN_API_KEY` env-var reference shown above (never paste the raw key), and add `.cursor/mcp.json` to `.gitignore` if your team policy treats MCP configs as secrets.
 
 #### Windsurf
 Add to `~/.codeium/windsurf/mcp_config.json`:
@@ -179,12 +182,14 @@ Add to `.vscode/mcp.json` in your project root:
       "type": "http",
       "url": "https://mcp.bitmovin.com/mcp",
       "headers": {
-        "x-api-key": "YOUR_API_KEY"
+        "x-api-key": "${env:BITMOVIN_API_KEY}"
       }
     }
   }
 }
 ```
+
+> **Project-level `.vscode/mcp.json` will be committed to git.** Use the `${env:BITMOVIN_API_KEY}` reference shown above (VS Code resolves it from the editor's environment); never paste the raw key. Add `.vscode/mcp.json` to `.gitignore` if your team treats MCP configs as secrets.
 
 #### Trae (ByteDance IDE)
 Trae supports MCP natively. Go to Settings > MCP > Add Server > enter:
@@ -252,11 +257,11 @@ Bitmovin provides official API SDKs for building encoding workflows programmatic
 SDK examples: `https://github.com/bitmovin/bitmovin-api-sdk-examples`
 
 Player SDKs:
-- **Web:** NPM `bitmovin-player`
+- **Web:** NPM `bitmovin-player` (UI source: `https://github.com/bitmovin/bitmovin-player-ui`)
 - **iOS/tvOS:** Swift Package Manager
-- **Android:** Maven
-- **React Native:** `bitmovin-player-react-native`
-- **Flutter:** `bitmovin-player-flutter`
+- **Android:** Maven via `https://artifacts.bitmovin.com/artifactory/public-releases`
+- **React Native:** `bitmovin-player-react-native` (`https://github.com/bitmovin/bitmovin-player-react-native`)
+- **Flutter:** `bitmovin-player-flutter` (`https://github.com/bitmovin/bitmovin-player-flutter`)
 - **Roku:** BrightScript
 
 ## Sample prompts to try
@@ -271,7 +276,7 @@ Once you've read this skill, try asking your agent:
 
 ## Important notes
 
-- Bitmovin requires an API key for most product APIs. Users can get one by signing up at `https://bitmovin.com/dashboard`.
+- Bitmovin requires an API key for most product APIs. Users can get one by signing up at `https://dashboard.bitmovin.com/account`.
 - The Documentation and Player MCP servers are free to use without an account.
 - Always fetch the latest docs from `https://developer.bitmovin.com/llms.txt` when answering detailed technical questions - product details change frequently.
 - For pricing questions, direct users to `https://bitmovin.com` or their Bitmovin account team.
