@@ -1,0 +1,334 @@
+version: 0.1
+purpose: |
+  Cross-field domain rules for Bitmovin VOD encodings. Consulted by the
+  bitmovin-encoding-vod skill before assembling a generic template, in
+  addition to the published Encoding Template JSON Schema.
+
+  The schema enforces structural validity (required fields, enums); these
+  rules enforce semantic compatibility (e.g. "fMP4 muxings must hold exactly
+  one stream"). Together they catch most bad templates *before* submission.
+coverage_caveats:
+  - Some constraints fire only at encode time (encoder-runtime rejections,
+    manifest-generator edge cases, DRM license-server quirks) and cannot be
+    pre-validated by a static rule check.
+  - Encoder-version gating is referenced where load-bearing but not
+    exhaustively modeled. If you target a specific encoder version,
+    additional rules apply that are not captured here.
+  - VOD scope only — live-only rules have been removed from this rulebook.
+    Every rule below applies to VOD encodings.
+
+rules:
+  # ─── Codec constraints ────────────────────────────────────────────────
+  - id: codec.av1.min_bitrate
+    topic: codec
+    rule: |
+      AV1 video config bitrate must be >= 10_000 (10 kbps), UNLESS the codec
+      config is only referenced by streams in a PER_TITLE_TEMPLATE* mode
+      (where bitrate is computed by the per-title algorithm).
+    applies_when: |
+      codec.type == AV1 && some referencing stream.mode is not in
+      {PER_TITLE_TEMPLATE, PER_TITLE_TEMPLATE_FIXED_RESOLUTION,
+       PER_TITLE_TEMPLATE_COMPLEXITY_RANGE}
+    notes: |
+      The per-title carve-out is enforced at the encoding level (where the
+      validator can see whether the encoding is per-title), not by the
+      AV1-specific codec check. The same carve-out is expected to apply to
+      any future per-codec bitrate validators.
+
+  # ─── Muxing × stream-count compatibility ──────────────────────────────
+  - id: muxing.fmp4.exactly_one_stream
+    topic: muxing
+    rule: fMP4 muxings must contain exactly one stream.
+    applies_when: muxing.type == FMP4
+
+  - id: muxing.mp4_fragmented.multi_stream_manifest_type
+    topic: muxing
+    rule: |
+      Fragmented MP4 muxings (fragmentDuration set) with >1 stream are only
+      allowed when fragmentedMP4MuxingManifestType opts in via
+      FragmentedMP4MuxingManifestType.allowsMultipleStreams().
+    applies_when: muxing.type == MP4 && muxing.fragmentDuration != null && streams.size > 1
+
+  # ─── Muxing × codec compatibility ─────────────────────────────────────
+  - id: muxing.mp4_fragmented.av1_manifest_type
+    topic: muxing
+    rule: |
+      AV1 streams in a fragmented MP4 muxing are only allowed when
+      fragmentedMP4MuxingManifestType is DASH_ON_DEMAND or NONE.
+    applies_when: muxing.type == MP4 && muxing.fragmentDuration != null && stream.codec.type == AV1
+
+  - id: muxing.fmp4.pts_align_mode_codec
+    topic: muxing
+    rule: |
+      PTSAlignMode = ALIGN_ZERO_NEGATIVE_CTO is only allowed when ALL video
+      streams in the fMP4 muxing are HEVC or AVC.
+    applies_when: muxing.type == FMP4 && muxing.ptsAlignMode == ALIGN_ZERO_NEGATIVE_CTO
+
+  # ─── Muxing × DRM compatibility ───────────────────────────────────────
+  - id: drm.fmp4.fairplay_codec
+    topic: drm
+    rule: |
+      fMP4 + FairPlay (or CencDrm with .fairPlay) requires all video streams
+      to be HEVC, UNLESS the encoder version supports
+      FIXED_ENCRYPTION_METHOD_SELECTION (then H.264 is also allowed).
+    applies_when: muxing.type == FMP4 && (drm == FairPlay || drm.cenc.fairPlay != null)
+    notes: Encoder-version gated.
+
+  # ─── Encoding mode ────────────────────────────────────────────────────
+  - id: encoding_mode.all_video_streams_match
+    topic: encoding_mode
+    rule: All video streams in an encoding must use the same encoding mode.
+    applies_when: encoding has >1 video stream
+
+  - id: encoding_mode.no_request_codec_conflict
+    topic: encoding_mode
+    rule: |
+      Encoding mode set on the start request and on a codec config cannot
+      both be specified — pick one level.
+    applies_when: start.encodingMode != null && codecConfig.encodingMode != null
+
+  # ─── Per-Title constraints ────────────────────────────────────────────
+  - id: per_title.fixed_resolution_max_bitrate
+    topic: per_title
+    rule: |
+      Fixed-resolution anchor stream maxBitrate must be <=
+      perTitleStartConfiguration.maxBitrate when set.
+    applies_when: stream.mode == PER_TITLE_TEMPLATE_FIXED_RESOLUTION && perTitle.maxBitrate != null
+
+  - id: per_title.fixed_resolution_min_bitrate
+    topic: per_title
+    rule: |
+      Fixed-resolution anchor stream minBitrate must be >=
+      perTitleStartConfiguration.minBitrate when set.
+    applies_when: stream.mode == PER_TITLE_TEMPLATE_FIXED_RESOLUTION && perTitle.minBitrate != null
+
+  - id: per_title.consecutive_stream_bitrate_gap
+    topic: per_title
+    rule: |
+      Across all per-title streams sorted by pixel count, consecutive pairs
+      must satisfy `(higher.maxBitrate - lower.minBitrate) >= minBitrateStepSize`.
+    applies_when: encoding.perTitle != null && multiple per-title streams
+    notes: Replaces v0's combined "step_size" rule — this is the cross-resolution gap part.
+
+  - id: per_title.complexity_range_step_size
+    topic: per_title
+    rule: |
+      For per-title streams in mode COMPLEXITY_RANGE, both consecutive
+      diffMinBitrate and diffMaxBitrate must each be >= minBitrateStepSize.
+    applies_when: stream.mode == PER_TITLE_TEMPLATE_COMPLEXITY_RANGE
+    notes: Replaces v0's combined "step_size" rule — this is the complexity-range part.
+
+  - id: per_title.no_custom_manifests_in_same_template
+    topic: per_title
+    rule: |
+      A single Encoding Template cannot combine Per-Title with custom
+      DASH/HLS manifests. Custom manifests reference Stream and Muxing
+      IDs that the Per-Title analysis only produces after the encoding
+      runs, so the Templates API cannot resolve those refs at submit
+      time. Per-Title encodings must use default manifests
+      (`manifests.<kind>.defaultapi.<id>`); workflows needing custom
+      adaptation sets must split into two encoding templates — first
+      the Per-Title encoding, then a manifest-only template referencing
+      the resulting streams/muxings.
+    applies_when: encoding.perTitle != null && manifests contain non-defaultapi entries
+    notes: |
+      Not enforced as a pre-submit check today; the Templates API will
+      accept a Per-Title + custom-manifest template and either drop the
+      manifests silently or fail asynchronously. Treat this as a
+      design-time constraint when authoring custom templates.
+
+  # ─── Hardware encoding (gpu/nvenc) ────────────────────────────────────
+  - id: hw.vod_only
+    topic: hardware_encoding
+    rule: Hardware encoding is only supported for VOD encodings (not LIVE).
+    applies_when: encoding has any HW-accelerated codec config
+
+  - id: hw.aws_only
+    topic: hardware_encoding
+    rule: |
+      Hardware encoding requires an AWS cloud region for primary, fallback,
+      and effective fallback cloud regions — non-AWS in any of these slots
+      is rejected.
+    applies_when: encoding has any HW-accelerated codec config
+
+  - id: hw.no_filters
+    topic: hardware_encoding
+    rule: Streams with hardware encoding cannot have video filters.
+    applies_when: stream.codec is HW-accelerated && stream.filters not empty
+
+  - id: hw.no_per_title
+    topic: hardware_encoding
+    rule: Hardware encoding cannot be combined with Per-Title.
+    applies_when: encoding.perTitle != null
+
+  - id: hw.no_dolby_vision
+    topic: hardware_encoding
+    rule: Hardware encoding cannot be combined with Dolby Vision.
+    applies_when: encoding contains Dolby Vision
+
+  - id: hw.no_forensic_watermark
+    topic: hardware_encoding
+    rule: Streams with hardware encoding cannot have NexGuard forensic watermarking.
+    applies_when: stream.nexguardFileMarker != null
+
+  - id: hw.no_burnin_subtitle
+    topic: hardware_encoding
+    rule: Streams with hardware encoding cannot have SRT or DVB burn-in subtitles.
+    applies_when: stream.captions contains SrtBurnInSubtitle or DvbBurnInSubtitle
+
+  - id: hw.no_thumbnails
+    topic: hardware_encoding
+    rule: Streams with hardware encoding cannot have thumbnails attached.
+    applies_when: stream.thumbnails not empty
+
+  - id: hw.no_psnr
+    topic: hardware_encoding
+    rule: Streams with hardware encoding cannot have PSNR quality metrics.
+    applies_when: stream.psnrQualityMetricsConfig != null
+
+  # ─── Sprite ───────────────────────────────────────────────────────────
+  - id: sprite.tiles_paired
+    topic: sprite
+    rule: hTiles and vTiles on a sprite must be set together (or both unset).
+
+  - id: sprite.aspect_mode_dimensions
+    topic: sprite
+    rule: When aspectMode is set on a sprite, both width and height must be specified.
+
+  - id: sprite.file_extension
+    topic: sprite
+    rule: spriteName must have file extension .jpg, .jpeg, or .png.
+
+  - id: sprite.jpeg_config_jpg_only
+    topic: sprite
+    rule: jpegConfig is only valid when spriteName is a JPG/JPEG file (not PNG).
+    applies_when: sprite.jpegConfig != null
+
+  - id: sprite.images_per_file_no_tiles
+    topic: sprite
+    rule: imagesPerFile cannot be set when both vTiles and hTiles are defined.
+    applies_when: sprite.hTiles != null && sprite.vTiles != null
+
+  # ─── Thumbnail ────────────────────────────────────────────────────────
+  - id: thumbnail.position_or_interval
+    topic: thumbnail
+    rule: Thumbnail positions and interval are mutually exclusive (cannot both be set).
+
+  - id: thumbnail.position_or_interval_required
+    topic: thumbnail
+    rule: At least one of positions or interval must be specified on a thumbnail.
+
+  - id: thumbnail.aspect_mode_dimensions
+    topic: thumbnail
+    rule: When aspectMode is set on a thumbnail, both width and height must be specified.
+
+  - id: thumbnail.interval_min
+    topic: thumbnail
+    rule: Thumbnail interval must be >= 1.0 seconds.
+    applies_when: thumbnail.interval != null
+
+  - id: thumbnail.pattern_extension
+    topic: thumbnail
+    rule: Thumbnail pattern must produce a file with extension .jpeg, .jpg, or .png.
+
+  # ─── Dolby Vision ─────────────────────────────────────────────────────
+  - id: dv.input_or_output_metadata
+    topic: dolby_vision
+    rule: |
+      Dolby Vision encoding requires either a Dolby Vision Input (mezzanine
+      + metadata) OR a Dolby Vision output stream (H265DynamicRange =
+      DOLBY_VISION); one path must be provided.
+
+  - id: dv.bufsize_maxrate_required
+    topic: dolby_vision
+    rule: |
+      Dolby Vision codec configs must set both bufSize and maxRate, except
+      for per-title encodings where these are computed from factors.
+    notes: Per-title carve-out at lines 116-118 and 420-422.
+
+  - id: dv.pixel_format
+    topic: dolby_vision
+    rule: Dolby Vision streams require pixel format YUV420P10LE.
+
+  - id: dv.crop_filter_dynamic_range
+    topic: dolby_vision
+    rule: |
+      Crop filter is only allowed when stream's H265DynamicRange is one of
+      DOLBY_VISION, DOLBY_VISION_PROFILE_5, or DOLBY_VISION_PROFILE_8_1.
+    notes: |
+      Corrected from v0 — the generic DOLBY_VISION enum value is also allowed,
+      not just profiles 5 and 8.1.
+
+  - id: dv.muxing_audio_codec_allowlist
+    topic: dolby_vision
+    rule: |
+      Muxings carrying Dolby Vision video may only contain AAC or
+      DOLBY_ATMOS audio streams.
+
+  - id: dv.input_codec_allowlist
+    topic: dolby_vision
+    rule: Only H.264 and H.265 streams can have a Dolby Vision input.
+    applies_when: stream.input is Dolby Vision Input
+    notes: |
+      Replaces v0's "video_codec_allowlist" rule, which conflated input and
+      output. Output-side: only H.265 has an explicit DV validation path
+      (H265DynamicRange enforced at line 411). The validator does not
+      explicitly *reject* H.264 output for DV; treat as unverified.
+
+  - id: dv.single_config_per_stream
+    topic: dolby_vision
+    rule: A stream may have at most one Dolby Vision codec config.
+
+  - id: dv.per_title_factors_required
+    topic: dolby_vision
+    rule: |
+      Per-Title Dolby Vision encoding requires both codecBufsizeFactor and
+      codecMaxBitrateFactor to be set on the codec config.
+    applies_when: encoding.perTitle != null && encoding contains Dolby Vision
+
+  - id: dv.single_crop_filter
+    topic: dolby_vision
+    rule: |
+      With Dolby Vision output, each stream may have at most one crop filter,
+      and all crop filters across streams in the same encoding must be identical.
+
+  - id: dv.no_mixed_dynamic_ranges
+    topic: dolby_vision
+    rule: |
+      Streams sharing the same Dolby Vision input cannot mix different
+      H265DynamicRange values (e.g. SDR and HDR10) within one encoding.
+
+  - id: dv.no_mixed_dv_and_non_dv_outputs
+    topic: dolby_vision
+    rule: |
+      If any video stream has Dolby Vision output, all video streams in the
+      encoding must have Dolby Vision output (no mixed DV / non-DV ladders).
+
+  - id: dv.per_title_encoder_version
+    topic: dolby_vision
+    rule: |
+      Per-Title Dolby Vision encoding requires an encoder version that
+      supports the per-title-with-Dolby-Vision feature flag.
+    applies_when: encoding.perTitle != null && encoding contains Dolby Vision
+    notes: Encoder-version gated.
+
+  # ─── Dolby Digital ────────────────────────────────────────────────────
+  - id: dv.no_concatenation_dd_input
+    topic: dolby_digital
+    rule: |
+      Concatenation is forbidden when input contains Dolby Digital
+      (DD or DDPLUS) audio, unless the encoder version supports the
+      DD-fail-fast-allow-concatenation feature flag.
+
+  - id: dd.drm_encoder_features
+    topic: dolby_digital
+    rule: |
+      DRM combined with Dolby Digital (DD/DDPLUS) on MP4 or fMP4 muxings
+      requires specific encoder feature flags to be active.
+    notes: Encoder-version gated.
+
+  - id: dd.invalid_filters
+    topic: dolby_digital
+    rule: |
+      Streams with Dolby Digital audio (DD/DDPLUS) cannot have AUDIO_VOLUME,
+      WATERMARK, or ENHANCED_WATERMARK filters.

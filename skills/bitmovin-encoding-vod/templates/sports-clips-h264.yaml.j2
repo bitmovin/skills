@@ -1,0 +1,125 @@
+{# Bitmovin Encoding Template — H.264 Sports Clips VOD with NVIDIA hardware
+   acceleration (VOD_HARDWARE_SHORTFORM preset).
+
+   Designed for live-sports clip pipelines where time-to-publish dominates
+   over per-bit savings: NVIDIA-GPU-backed instances, a static H.264 ladder
+   tuned for short-form sports, and HLS-only output (no DASH analysis time).
+
+   Notable structural differences from the per-title / fixed-ladder
+   scenarios:
+   - presetConfiguration: VOD_HARDWARE_SHORTFORM on every codec config
+     (this is the GPU-accelerated short-form preset; requires
+     cloudRegion: AWS_EU_WEST_1)
+   - 9-rendition ladder with multiple bitrates per height (540p × 3,
+     720p × 2, 1080p × 2) — the published sports playbook
+   - HLS-only with an *explicit* manifest config (not the defaultapi
+     shortcut) so each rendition's stream/muxing/segmentPath is wired
+     by hand — this matches the published sports template
+   - video-only (no audio), ACL=PRIVATE — UGC-style downstream pipeline
+
+   The published playbook caps the four lowest-bitrate variants at
+   23.976 fps to save bits at low rates. We deliberately drop those
+   explicit rates here: any renditions in an HLS ladder must share the
+   same output frame rate, and the original layout breaks for sources
+   that aren't already 23.976. Letting every rendition inherit the
+   source fps keeps the template source-agnostic — customers who *do*
+   want the lower-fps tail can hand-edit the rendered YAML and pin
+   `rate: 23.976` on every codec config. #}
+metadata:
+  type: VOD
+  name: {{ encodingName }}
+
+{% set outputBasePathPrefix = (outputBasePath.rstrip('/') ~ '/') if outputBasePath else '' %}
+
+{% set sportsLadder = [
+  {'name': '360p',       'height':  360, 'bitrate':  145000},
+  {'name': '432p',       'height':  432, 'bitrate':  300000},
+  {'name': '540p-600',   'height':  540, 'bitrate':  600000},
+  {'name': '540p-900',   'height':  540, 'bitrate':  900000},
+  {'name': '540p-1600',  'height':  540, 'bitrate': 1600000},
+  {'name': '720p-2400',  'height':  720, 'bitrate': 2400000},
+  {'name': '720p-3400',  'height':  720, 'bitrate': 3400000},
+  {'name': '1080p-4500', 'height': 1080, 'bitrate': 4500000},
+  {'name': '1080p-5800', 'height': 1080, 'bitrate': 5800000},
+] %}
+
+configurations:
+  video:
+    h264:
+{% for r in sportsLadder %}
+      v-{{ r.name }}:
+        properties:
+          name: {{ encodingName }} h264 {{ r.name }}
+          presetConfiguration: VOD_HARDWARE_SHORTFORM
+          height: {{ r.height }}
+          bitrate: {{ r.bitrate }}
+{% endfor %}
+
+encodings:
+  main-encoding:
+    properties:
+      name: {{ encodingName }}
+      cloudRegion: AWS_EU_WEST_1
+      encoderVersion: {{ encoderVersion | default('STABLE') }}
+
+    streams:
+{% for r in sportsLadder %}
+      s-{{ r.name }}:
+        properties:
+          inputStreams:
+            - inputId: {{ inputId }}
+              inputPath: {{ inputPath }}
+          codecConfigId: $/configurations/video/h264/v-{{ r.name }}
+{% endfor %}
+
+    muxings:
+      fmp4:
+{% for r in sportsLadder %}
+        m-{{ r.name }}:
+          properties:
+            name: fmp4 h264 {{ r.name }}
+            streamConditionsMode: DROP_MUXING
+            streams:
+              - streamId: $/encodings/main-encoding/streams/s-{{ r.name }}
+            outputs:
+              - outputId: {{ outputId }}
+                outputPath: "{{ outputBasePathPrefix }}video/{{ r.name }}/"
+                acl:
+                  - permission: {{ outputAcl | default('PRIVATE') }}
+            initSegmentName: init.mp4
+            segmentLength: {{ segmentLength | default(4.0) }}
+            segmentNaming: "seg_%number%.m4s"
+{% endfor %}
+
+    start:
+      properties:
+        vodHlsManifests:
+          - manifestId: $/manifests/hls/hls-sports
+
+manifests:
+  hls:
+    hls-sports:
+      properties:
+        name: {{ encodingName }} HLS
+        manifestName: main.m3u8
+        outputs:
+          - outputId: {{ outputId }}
+            outputPath: "{{ outputBasePathPrefix }}"
+            acl:
+              - permission: {{ outputAcl | default('PRIVATE') }}
+
+      streams:
+{% for r in sportsLadder %}
+        hls-{{ r.name }}:
+          properties:
+            name: video {{ r.name }}
+            uri: video_{{ r.name }}.m3u8
+            encodingId: $/encodings/main-encoding
+            streamId: $/encodings/main-encoding/streams/s-{{ r.name }}
+            muxingId: $/encodings/main-encoding/muxings/fmp4/m-{{ r.name }}
+            segmentPath: "video/{{ r.name }}/"
+{% endfor %}
+
+      start:
+        properties:
+          manifestGenerator: V2

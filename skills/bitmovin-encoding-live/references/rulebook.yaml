@@ -1,0 +1,174 @@
+version: 0.2
+purpose: |
+  Cross-field domain rules for Bitmovin LIVE encodings. Consulted by the
+  bitmovin-encoding-live skill before assembling a generic ("custom")
+  template, in addition to the published Encoding Template JSON Schema.
+
+  The schema enforces structural validity (required fields, enums); these
+  rules enforce semantic compatibility (e.g. "fMP4 muxings must hold exactly
+  one stream", "live encodings can't use THREE_PASS"). Together they catch
+  most bad templates *before* submission.
+
+  Adapted from skills/bitmovin-encoding-vod/references/rulebook.yaml (v0.1).
+  Filtered to rules that can fire on a LIVE encoding: dropped per-title,
+  hardware-acceleration, sprite, thumbnail, and Dolby Vision rules — those
+  are out of scope for live. Added live-only rules.
+
+  v0.2 verification pass: every rule was re-checked against current Bitmovin
+  API behavior. Two soft documentation rules were dropped
+  (live.srt_listener_port_range, live.srt_passphrase_length) — they are not
+  enforced as schema or pre-submit checks, so validate_rules.py would either
+  false-positive or miss them. One rule was downgraded
+  (live.manifest_generator_v2) — V1 is currently accepted (silently falls
+  back to legacy) rather than rejected.
+coverage_caveats:
+  - Some constraints fire only at encode time (encoder-runtime rejections,
+    manifest-generator edge cases, DRM license-server quirks) and cannot
+    be pre-validated by a static rule check.
+  - Encoder-version gating is referenced where load-bearing but not
+    exhaustively modeled. If you target a specific encoder version,
+    additional rules apply that are not captured here.
+  - Live scope only — VOD-only rules are not represented here at all.
+    The skill drops a large set when filtering the VOD rulebook
+    (per-title, hardware acceleration, sprite, thumbnail, Dolby
+    Vision, anything else that can't fire on a live encoding). Use
+    the skills/bitmovin-encoding-vod rulebook for VOD work.
+
+rules:
+  # ─── Codec constraints ────────────────────────────────────────────────
+  - id: codec.av1.min_bitrate
+    topic: codec
+    rule: |
+      AV1 video config bitrate must be >= 10_000 (10 kbps). Live encodings
+      do not have a per-title carve-out — bitrate is always required.
+    applies_when: codec.type == AV1
+
+  # ─── Muxing × stream-count compatibility ──────────────────────────────
+  - id: muxing.fmp4.exactly_one_stream
+    topic: muxing
+    rule: fMP4 muxings must contain exactly one stream.
+    applies_when: muxing.type == FMP4
+    notes: |
+      The prebaked rtmp / redundant-rtmp / srt templates already follow this
+      (one fmp4 muxing per video rendition + one for audio). When authoring
+      a custom template, never share an fmp4 muxing across streams.
+
+  - id: muxing.fmp4.pts_align_mode_codec
+    topic: muxing
+    rule: |
+      fMP4 muxings with ptsAlignMode = ALIGN_ZERO_NEGATIVE_CTO require all
+      contained video streams to be H.264 or H.265.
+    applies_when: muxing.type == FMP4 && muxing.ptsAlignMode == ALIGN_ZERO_NEGATIVE_CTO
+
+  # ─── DRM ──────────────────────────────────────────────────────────────
+  - id: drm.fmp4.fairplay_codec
+    topic: drm
+    rule: |
+      fMP4 + FairPlay (or CencDrm with .fairPlay) requires all video streams
+      to be HEVC, UNLESS the encoder version supports
+      FIXED_ENCRYPTION_METHOD_SELECTION (then H.264 is also allowed).
+    applies_when: muxing.type == FMP4 && (drm == FairPlay || drm.cenc.fairPlay != null)
+    notes: Encoder-version gated.
+
+  - id: drm.hls.unsupported_drms
+    topic: drm
+    scope: live-only
+    rule: |
+      Live HLS manifests cannot reference muxings with MARLIN, PLAYREADY,
+      PRIMETIME, or CLEARKEY DRM.
+    applies_when: manifest.type == HLS_LIVE
+    notes: |
+      VOD HLS DRM exclusions, if they exist, are enforced elsewhere — do
+      not assume identical scope.
+
+  # ─── Encoding mode ────────────────────────────────────────────────────
+  - id: encoding_mode.live_subset
+    topic: encoding_mode
+    scope: live-only
+    rule: |
+      Live encodings only support encoding modes STANDARD, SINGLE_PASS,
+      TWO_PASS. THREE_PASS is rejected at the start-request level (the
+      live encoding mode enum lacks THREE_PASS) and at the codec-config
+      level by encoding-mode validation.
+    applies_when: encoding has a live.start block
+    notes: |
+      Two enforcement points. The request-level rejection (deserialization
+      of THREE_PASS into the live encoding-mode enum) fires before the
+      codec-config check; the codec-level path catches THREE_PASS set on
+      individual codec configs.
+
+  - id: encoding_mode.all_video_streams_match
+    topic: encoding_mode
+    rule: All video streams in an encoding must use the same encoding mode.
+    applies_when: encoding has >1 video stream
+
+  - id: encoding_mode.no_request_codec_conflict
+    topic: encoding_mode
+    rule: |
+      Encoding mode set on the start request and on a codec config cannot
+      both be specified — pick one level.
+    applies_when: start.encodingMode != null && codecConfig.encodingMode != null
+
+  # ─── Live ingest / static ingest points ───────────────────────────────
+  - id: live.rtmp_input_type
+    topic: live_ingest
+    scope: live-only
+    rule: |
+      Live RTMP ingest must be expressed under `inputs.redundantRtmp`. The
+      `inputs.rtmp` resource type exists (one default RTMP input per org,
+      auto-created at provisioning) but is exposed READ-ONLY and cannot
+      be created from a Templates API submission. Templates that put
+      configuration under `inputs.rtmp` are silently dropped at apply
+      time, leaving the encoding stuck at type=NONE.
+    applies_when: encoding wants RTMP ingest
+    notes: |
+      The schema (`inputs.properties` lists only `redundantRtmp`) catches
+      most cases, but a typo in a hand-authored template still slips
+      through to the silent-drop behaviour. The skill's Step 7a partial-
+      parse defensive check is the runtime backstop.
+
+  - id: live.stream_key_assignment
+    topic: live_ingest
+    scope: live-only
+    rule: |
+      `staticIngestPoint.streamKeyConfiguration.type` must be GENERATE or
+      ASSIGN. ASSIGN requires `streamKeyId` to be a concrete UUID of an
+      already-existing stream key. Forward references to a top-level
+      `live.streamKeys.<local-id>` block via `$/...` syntax do NOT resolve
+      at template-apply time — the API rejects with
+      "Could not find reference resource: streamKeyId".
+    applies_when: input.redundantRtmp.staticIngestPoints[].streamKeyConfiguration.type == ASSIGN
+    notes: |
+      The ref-resolution behaviour is verified empirically against the real
+      API. The skill's Step 4b flow does the pre-create-or-reuse via curl
+      and passes a concrete UUID.
+
+  # NOTE: Two SRT-shape rules from rulebook v0.1 were dropped here —
+  # `live.srt_listener_port_range` (port ∈ {2088, 2089, 2090, 2091}) and
+  # `live.srt_passphrase_length` (16 or 32 chars). Neither is enforced as
+  # a schema or pre-submit check. The 2088-2091 port set appears to be an
+  # infrastructure / load-balancer constraint outside the API; the
+  # passphrase length is an SRT-runtime constraint. The prebaked SRT
+  # prompts in SKILL.md still surface them as guidance to keep the user
+  # inside the working envelope. Re-add if/when an enforcing pre-submit
+  # validator is found.
+
+  # ─── Live manifest generator ──────────────────────────────────────────
+  - id: live.manifest_generator_v2
+    topic: live_manifests
+    scope: live-only
+    rule: |
+      Live encodings should pin `manifestGenerator: V2` on
+      `live.start.properties`. **V1 (LEGACY) is deprecated and will be
+      discontinued soon — new live encodings must not target it.** The
+      API still accepts V1 today (the manifest-generator selector
+      silently resolves to LEGACY when V2 isn't supported by the encoder
+      version), so this is a soft, advisory rule rather than a hard
+      pre-submit rejection.
+    applies_when: encoding has a live.start block
+    notes: |
+      The prebaked rtmp / redundant-rtmp / srt templates already hardcode
+      V2. The custom-build decision tree should pin V2 by default and
+      surface the deprecation when offering manifestGenerator as a
+      configurable knob. Revisit this rule once the API begins rejecting
+      V1 outright.

@@ -1,0 +1,42 @@
+{
+  "name": "bitmovin-encoding-live",
+  "version": "0.1.0",
+  "description": "Portable Bitmovin live encoding skill packaged for Codex as a local plugin.",
+  "author": {
+    "name": "Bitmovin",
+    "url": "https://github.com/bitmovin/skills"
+  },
+  "homepage": "https://github.com/bitmovin/skills",
+  "repository": "https://github.com/bitmovin/skills",
+  "license": "MIT",
+  "keywords": [
+    "bitmovin",
+    "video",
+    "encoding",
+    "live",
+    "rtmp",
+    "srt",
+    "streaming",
+    "codex-plugin"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Bitmovin Live Encoding",
+    "shortDescription": "Create and start a Bitmovin live encoding (RTMP / redundant RTMP / SRT)",
+    "longDescription": "Walks the user through creating and starting a Bitmovin live encoding end-to-end via the Encoding Templates API and the Bitmovin Python SDK. Renders Jinja templates from a small parameter file, validates against the published Encoding Template JSON schema, submits and polls until the encoder is RUNNING, and prints ingest URL + manifest URLs. Covers RTMP (single + redundant) and SRT (LISTENER / CALLER, optional AES passphrase).",
+    "developerName": "Bitmovin",
+    "category": "Coding",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/bitmovin/skills",
+    "defaultPrompt": [
+      "Set up a Bitmovin live encoding for RTMP ingest",
+      "Start a redundant-RTMP live encoding on Bitmovin",
+      "Start an SRT live encoding on Bitmovin"
+    ],
+    "brandColor": "#1730E7"
+  }
+}
