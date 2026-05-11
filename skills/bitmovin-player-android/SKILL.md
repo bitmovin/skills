@@ -130,8 +130,8 @@ Avoid:
 
 ### 5) Source loading strategy
 
-- Prefer hardcoding source types when the stream type is known.
-- Use `SourceConfig.fromUrl(...)` when source auto-detection is needed or the source type is unknown.
+- Default to explicit source types when the stream type is known.
+- Use `SourceConfig.fromUrl(...)` only when the source type is unknown or genuinely dynamic.
 - For multi-URL playback candidates (e.g., HLS/DASH alternatives), implement deterministic fallback behavior.
 
 ### 6) PiP/fullscreen via Bitmovin handlers

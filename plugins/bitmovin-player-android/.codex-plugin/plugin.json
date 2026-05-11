@@ -25,7 +25,7 @@
   "interface": {
     "displayName": "Bitmovin Player Android",
     "shortDescription": "Integrate Bitmovin Android Player SDK correctly in Android apps",
-    "longDescription": "Adds a reusable Bitmovin Android Player SDK workflow to Codex, covering setup, player lifecycle, SourceConfig.fromUrl, Web UI handlers, media session, cast, and TV variants.",
+    "longDescription": "Adds a reusable Bitmovin Android Player SDK workflow to Codex, covering setup, player lifecycle, explicit source typing with SourceConfig.fromUrl fallback, Web UI handlers, media session, cast, and TV variants.",
     "developerName": "Bitmovin",
     "category": "Coding",
     "capabilities": [
