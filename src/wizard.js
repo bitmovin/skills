@@ -6,7 +6,6 @@ import { createInterface } from 'node:readline/promises';
 import { stdin, stdout } from 'node:process';
 
 const SKILL_URL = process.env.BITMOVIN_SKILL_URL || 'https://bitmovin.com/skill';
-const SKILL_URL_FALLBACK = 'https://raw.githubusercontent.com/bitmovin/skills/main/skills/bitmovin/SKILL.md';
 
 const c = {
   bold: (s) => `\x1b[1m${s}\x1b[0m`,
@@ -123,18 +122,14 @@ function listTargets() {
 }
 
 async function fetchSkill() {
-  const tryFetch = async (url) => {
-    const res = await fetch(url, { headers: { Accept: 'text/markdown, text/plain;q=0.9' } });
-    if (!res.ok) throw new Error(`HTTP ${res.status} fetching ${url}`);
-    return await res.text();
-  };
-  try {
-    return await tryFetch(SKILL_URL);
-  } catch (primaryErr) {
-    if (SKILL_URL === SKILL_URL_FALLBACK) throw primaryErr;
-    stdout.write(c.yellow(`Primary source unreachable (${primaryErr.message}); falling back to GitHub raw.\n`));
-    return await tryFetch(SKILL_URL_FALLBACK);
+  const res = await fetch(SKILL_URL, { headers: { Accept: 'text/markdown, text/plain;q=0.9' } });
+  if (!res.ok) {
+    throw new Error(
+      `Failed to fetch skill from ${SKILL_URL} (HTTP ${res.status}). ` +
+      `Override the source with BITMOVIN_SKILL_URL if needed.`,
+    );
   }
+  return await res.text();
 }
 
 function resolveTargetPath(target) {
@@ -199,10 +194,6 @@ export async function run(argv) {
 
     if (target.appendIfExists && existsSync(destPath) && !args.flags.yes) {
       const ans = (await rl.question(`${c.yellow('!')} ${destPath} exists. (a)ppend, (o)verwrite, or (c)ancel? [a/o/c]: `)).trim().toLowerCase();
-      if (ans === 'c' || ans === '') {
-        stdout.write(c.yellow('Cancelled.\n'));
-        return;
-      }
       if (ans === 'a') {
         const { readFile } = await import('node:fs/promises');
         const existing = await readFile(destPath, 'utf8');
@@ -210,6 +201,10 @@ export async function run(argv) {
         await writeFile(destPath, merged, 'utf8');
         stdout.write(c.green(`✓ Appended to ${destPath}\n`));
         printNextSteps(target);
+        return;
+      }
+      if (ans !== 'o') {
+        stdout.write(c.yellow('Cancelled.\n'));
         return;
       }
     } else if (!(await confirmOverwrite(rl, destPath, args.flags.yes))) {
