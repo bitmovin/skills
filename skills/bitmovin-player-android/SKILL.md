@@ -93,7 +93,7 @@ Build player config explicitly and keep it centralized:
   - audio becoming noisy handling
 - Remote control / cast config where needed
 
-### 2a) License request denied triage runbook
+**License request denied triage runbook:**
 
 When Bitmovin license requests are denied, check this first:
 
