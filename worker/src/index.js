@@ -120,8 +120,8 @@ function renderLanding() {
   <p class="lead">Drop the Bitmovin skill into Claude Code, Cursor, Windsurf, GitHub Copilot, or OpenAI Codex. Your AI tool will know how to use Bitmovin Player, Encoding, Observability, AI Scene Analysis, Streams, and Stream Lab.</p>
 
   <div class="cmd">
-    <code id="cmd">${NPX_CMD}</code>
-    <button onclick="navigator.clipboard.writeText(document.getElementById('cmd').textContent)">Copy</button>
+    <code id="cmd-npx">${NPX_CMD}</code>
+    <button data-copy="cmd-npx">Copy</button>
   </div>
 
   <h2>What this does</h2>
@@ -134,7 +134,23 @@ function renderLanding() {
 
   <h2>Already in a chat with an AI?</h2>
   <p>Paste this prompt:</p>
-  <div class="cmd"><code>Learn about Bitmovin from bitmovin.com/skill</code></div>
+  <div class="cmd">
+    <code id="cmd-prompt">Learn about Bitmovin from bitmovin.com/skill</code>
+    <button data-copy="cmd-prompt">Copy</button>
+  </div>
+  <script>
+    document.querySelectorAll('button[data-copy]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var el = document.getElementById(btn.getAttribute('data-copy'));
+        if (!el) return;
+        navigator.clipboard.writeText(el.textContent).then(function () {
+          var original = btn.textContent;
+          btn.textContent = 'Copied';
+          setTimeout(function () { btn.textContent = original; }, 1200);
+        });
+      });
+    });
+  </script>
 
   <p class="small raw">Raw skill content: <a href="/skill.md">bitmovin.com/skill.md</a> &middot; Source: <a href="${REPO_URL}">github.com/bitmovin/skills</a></p>
 </main>
