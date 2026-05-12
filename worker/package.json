@@ -1,0 +1,14 @@
+{
+  "name": "bitmovin-skill-worker",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Cloudflare Worker that serves the canonical Bitmovin hub skill at bitmovin.com/skill with content negotiation.",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "tail": "wrangler tail"
+  },
+  "devDependencies": {
+    "wrangler": "^4.90.0"
+  }
+}

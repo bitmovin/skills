@@ -1,0 +1,27 @@
+name = "bitmovin-skill"
+main = "src/index.js"
+compatibility_date = "2026-04-01"
+workers_dev = true
+
+# Bundle SKILL.md as text into the Worker at build time. The canonical
+# source lives at skills/bitmovin/SKILL.md and is imported via relative path.
+[[rules]]
+type = "Text"
+globs = ["**/*.md", "**/*.html"]
+fallthrough = true
+
+# `bitmovin.com/skill*` is a single greedy pattern that matches:
+#   /skill, /skill.md, /skill?format=…, /skill/anything
+# It would also match /skills, /skillset etc., but the WAF Skip Rule on
+# the zone uses exact-path filters (eq "/skill", eq "/skill.md",
+# starts_with "/skill/"), so those non-target paths still hit the bot
+# challenge before reaching the Worker — behavior is unchanged for them.
+[[routes]]
+pattern = "bitmovin.com/skill*"
+zone_name = "bitmovin.com"
+
+[observability]
+enabled = true
+
+[placement]
+mode = "smart"
