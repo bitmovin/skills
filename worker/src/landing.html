@@ -43,25 +43,24 @@
       padding: 72px 24px 56px; text-align: center;
     }
 
-    .eyebrow {
-      display: inline-block; font-size: 11px; font-weight: 600;
-      letter-spacing: 0.14em; text-transform: uppercase; color: var(--blue);
-      margin-bottom: 18px; opacity: 0; animation: fadeUp 0.5s ease forwards 0.05s;
-    }
-
     .hero h1 {
       font-size: clamp(36px, 5vw, 56px); font-weight: 700;
       letter-spacing: -0.03em; line-height: 1.05; margin-bottom: 18px;
+      text-wrap: balance;
       opacity: 0; animation: fadeUp 0.5s ease forwards 0.15s;
     }
 
     .hero-sub {
       font-size: 17px; color: var(--muted); line-height: 1.65;
-      max-width: 520px; margin: 0 auto 28px;
+      max-width: 520px; margin: 0 auto 8px;
       opacity: 0; animation: fadeUp 0.5s ease forwards 0.25s;
     }
 
-    .hero-sub strong { color: var(--text); font-weight: 600; }
+    .hero-tagline {
+      font-size: 17px; color: var(--text); font-weight: 600; line-height: 1.5;
+      max-width: 520px; margin: 0 auto 36px;
+      opacity: 0; animation: fadeUp 0.5s ease forwards 0.3s;
+    }
 
     /* PROMPT / NPX SWITCH */
     .prompt-tabs {
@@ -320,9 +319,9 @@
 
   <!-- HERO -->
   <section class="hero">
-    <span class="eyebrow">Bitmovin AI Hub</span>
-    <h1>Build with Bitmovin and AI</h1>
-    <p class="hero-sub">Your AI coding agent. Bitmovin's full product suite. <strong>Everything you need to start building.</strong></p>
+    <h1>Build with Bitmovin and&nbsp;AI</h1>
+    <p class="hero-sub">Your AI coding agent. Bitmovin's full product suite.</p>
+    <p class="hero-tagline">Everything you need to start building.</p>
 
     <div class="prompt-tabs" role="tablist">
       <button class="tab-btn active" data-tab="prompt" role="tab" aria-selected="true">Paste into your AI</button>
@@ -383,7 +382,7 @@
 
         <div class="step">
           <span class="step-num">04</span>
-          <h3 class="step-title">Start building</h3>
+          <h3 class="step-title">Start building with AI</h3>
           <p class="step-desc">Pick a prompt below and let your AI coding agent get to work on your streaming platform.</p>
           <a href="https://developer.bitmovin.com" class="step-link">View docs →</a>
         </div>
