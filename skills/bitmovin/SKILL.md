@@ -39,7 +39,7 @@ After persisting context, ask:
 
 > Would you like to connect the Bitmovin MCP server? This gives me direct access to Bitmovin's tools - I'll be able to query your encodings, play streams, analyze your viewer data, search documentation, and run playback tests.
 
-If yes, install the unified MCP server at `https://mcp.bitmovin.com/mcp` using the appropriate method for the user's environment (see the "MCP Server" section below for per-tool instructions). If the user does not have an API key yet, direct them to `https://dashboard.bitmovin.com/account` to get one before proceeding.
+If yes, install the unified MCP server at `https://mcp.bitmovin.com` using the appropriate method for the user's environment (see the "MCP Server" section below for per-tool instructions). If the user does not have an API key yet, direct them to `https://dashboard.bitmovin.com/account` to get one before proceeding.
 
 ### Step 3: Install the CLI (for coding agents / terminal environments only)
 
@@ -104,7 +104,7 @@ Adapt the depth and technicality of your responses to the user. If they seem non
 
 Bitmovin provides a single, unified MCP (Model Context Protocol) server that gives your AI agent access to all Bitmovin products through one connection: Encoding, Player, Observability, Stream Lab, and Documentation. 27 tools today, growing as product teams ship more.
 
-**Endpoint:** `https://mcp.bitmovin.com/mcp`
+**Endpoint:** `https://mcp.bitmovin.com`
 **Auth:** `x-api-key` header (get your key from `https://dashboard.bitmovin.com/account`)
 
 One server, every product. Tool names are namespaced (encoding_*, player_*, observability_*, streamlab_*, general_*) so agents pick the right one automatically.
@@ -114,7 +114,7 @@ One server, every product. Tool names are namespaced (encoding_*, player_*, obse
 #### Claude Code (terminal agent)
 ```shell
 claude mcp add -s user bitmovin -- \
-  npx mcp-remote https://mcp.bitmovin.com/mcp \
+  npx mcp-remote https://mcp.bitmovin.com \
   --header "x-api-key: $BITMOVIN_API_KEY"
 ```
 
@@ -127,7 +127,7 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS)
       "command": "npx",
       "args": [
         "mcp-remote",
-        "https://mcp.bitmovin.com/mcp",
+        "https://mcp.bitmovin.com",
         "--header", "x-api-key: YOUR_API_KEY"
       ]
     }
@@ -145,14 +145,14 @@ Add to `.cursor/mcp.json` in your project root (project-level) or `~/.cursor/mcp
       "command": "npx",
       "args": [
         "mcp-remote",
-        "https://mcp.bitmovin.com/mcp",
+        "https://mcp.bitmovin.com",
         "--header", "x-api-key: $BITMOVIN_API_KEY"
       ]
     }
   }
 }
 ```
-Or via UI: Cursor Settings > Features > MCP > + Add New MCP Server > choose Streamable HTTP > enter `https://mcp.bitmovin.com/mcp`.
+Or via UI: Cursor Settings > Features > MCP > + Add New MCP Server > choose Streamable HTTP > enter `https://mcp.bitmovin.com`.
 
 > **Project-level `.cursor/mcp.json` will be committed to git.** Use the `$BITMOVIN_API_KEY` env-var reference shown above (never paste the raw key), and add `.cursor/mcp.json` to `.gitignore` if your team policy treats MCP configs as secrets.
 
@@ -165,7 +165,7 @@ Add to `~/.codeium/windsurf/mcp_config.json`:
       "command": "npx",
       "args": [
         "mcp-remote",
-        "https://mcp.bitmovin.com/mcp",
+        "https://mcp.bitmovin.com",
         "--header", "x-api-key: YOUR_API_KEY"
       ]
     }
@@ -180,7 +180,7 @@ Add to `.vscode/mcp.json` in your project root:
   "servers": {
     "bitmovin": {
       "type": "http",
-      "url": "https://mcp.bitmovin.com/mcp",
+      "url": "https://mcp.bitmovin.com",
       "headers": {
         "x-api-key": "${env:BITMOVIN_API_KEY}"
       }
@@ -193,22 +193,22 @@ Add to `.vscode/mcp.json` in your project root:
 
 #### Trae (ByteDance IDE)
 Trae supports MCP natively. Go to Settings > MCP > Add Server > enter:
-`https://mcp.bitmovin.com/mcp`
+`https://mcp.bitmovin.com`
 Add your API key in the headers configuration.
 
 #### ChatGPT
-Settings > Connectors > Add connector > MCP > enter the URL: `https://mcp.bitmovin.com/mcp`
+Settings > Connectors > Add connector > MCP > enter the URL: `https://mcp.bitmovin.com`
 
 #### OpenAI Codex / Gemini CLI / other terminal agents
 Most terminal-based agents support MCP via config files. Use the Streamable HTTP URL:
 ```
-https://mcp.bitmovin.com/mcp
+https://mcp.bitmovin.com
 ```
 Pass `x-api-key` header with your Bitmovin API key.
 
 ### Individual product MCP servers
 
-The unified server at `mcp.bitmovin.com/mcp` aggregates these underlying servers. You can also connect them individually if you only need one product:
+The unified server at `mcp.bitmovin.com` aggregates these underlying servers. You can also connect them individually if you only need one product:
 
 | Server | Endpoint | Auth |
 |---|---|---|
