@@ -1,0 +1,42 @@
+{
+  "name": "@bitmovin/skills",
+  "version": "0.1.0",
+  "description": "Install Bitmovin's AI skill into Claude Code, Cursor, Windsurf, GitHub Copilot, and other AI coding tools with one command.",
+  "type": "module",
+  "bin": {
+    "bitmovin-skills": "./bin/cli.js"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "homepage": "https://github.com/bitmovin/skills",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bitmovin/skills.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bitmovin/skills/issues"
+  },
+  "keywords": [
+    "bitmovin",
+    "ai",
+    "skill",
+    "claude",
+    "cursor",
+    "windsurf",
+    "copilot",
+    "wizard",
+    "video",
+    "streaming"
+  ],
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
+}
