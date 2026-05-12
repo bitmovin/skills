@@ -7,7 +7,7 @@ workers_dev = true
 # source lives at skills/bitmovin/SKILL.md and is imported via relative path.
 [[rules]]
 type = "Text"
-globs = ["**/*.md"]
+globs = ["**/*.md", "**/*.html"]
 fallthrough = true
 
 # `bitmovin.com/skill*` is a single greedy pattern that matches:
