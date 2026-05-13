@@ -1,0 +1,46 @@
+{
+  "name": "bitmovin-player-ios",
+  "version": "0.1.0",
+  "description": "Portable Bitmovin Player Apple SDK integration skill packaged for Codex as a local plugin.",
+  "author": {
+    "name": "Bitmovin",
+    "url": "https://github.com/bitmovin/skills"
+  },
+  "homepage": "https://github.com/bitmovin/skills",
+  "repository": "https://github.com/bitmovin/skills",
+  "license": "MIT",
+  "keywords": [
+    "bitmovin",
+    "ios",
+    "tvos",
+    "visionos",
+    "player-sdk",
+    "video",
+    "streaming",
+    "hls",
+    "drm",
+    "airplay",
+    "pip",
+    "codex-plugin"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Bitmovin Player Apple",
+    "shortDescription": "Integrate Bitmovin Player SDK correctly in iOS, tvOS, and visionOS apps",
+    "longDescription": "Adds a reusable Bitmovin Player Apple SDK workflow to Codex, covering Swift Package Manager setup, player lifecycle, source loading, SwiftUI/UIKit integration, Combine-based event listening, platform UX, logs-first troubleshooting, Charles Proxy network inspection, mediastreamvalidator checks, and roadblock-lifting guidance.",
+    "developerName": "Bitmovin",
+    "category": "Coding",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/bitmovin/skills",
+    "defaultPrompt": [
+      "Add Bitmovin Player SDK to this iOS app",
+      "Troubleshoot this Bitmovin Player tvOS playback issue",
+      "Integrate Bitmovin Player SDK with SwiftUI and diagnose roadblocks"
+    ],
+    "brandColor": "#1730E7"
+  }
+}
