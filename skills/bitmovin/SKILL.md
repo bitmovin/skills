@@ -83,6 +83,7 @@ For detailed, up-to-date documentation, fetch the following resources:
 - **Player/Playback docs:** `https://developer.bitmovin.com/playback/`
 - **Streams docs:** `https://developer.bitmovin.com/streams/docs/overview`
 - **AI at Bitmovin overview:** `https://developer.bitmovin.com/streams/docs/ai-at-bitmovin`
+- **Source repo for this skill:** `https://github.com/bitmovin/skills` - Canonical hub skill, the `@bitmovin/skills` npx wizard, sub-skills (Player Web, Player Android, …), and the Cloudflare Worker that serves `bitmovin.com/skill`.
 
 When the user asks a technical question about Bitmovin, fetch the relevant llms.txt or documentation page before answering to ensure accuracy.
 

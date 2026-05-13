@@ -27,6 +27,21 @@ export default {
 
     const path = url.pathname.replace(/\/+$/, '') || '/';
 
+    // 301-redirect the common plural typo `/skills` to the canonical
+    // `/skill`. The Worker route `bitmovin.com/skill*` already matches
+    // these. Note that the zone's WAF Skip Rule only covers /skill,
+    // /skill.md and /skill/* — so curl/agents hitting /skills still
+    // see the bot challenge first. Browser users solve the challenge
+    // and reach this redirect on retry.
+    if (path === '/skills' || path === '/skills.md' || path === '/skills.markdown') {
+      const target = path.replace(/^\/skills/, '/skill') + url.search;
+      return Response.redirect(new URL(target, url).toString(), 301);
+    }
+    if (path.startsWith('/skills/')) {
+      const target = '/skill/' + path.slice('/skills/'.length) + url.search;
+      return Response.redirect(new URL(target, url).toString(), 301);
+    }
+
     if (path === '/skill.md' || path === '/skill.markdown') {
       return mdResponse(skillMd);
     }
