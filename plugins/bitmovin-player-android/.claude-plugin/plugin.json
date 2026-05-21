@@ -1,0 +1,22 @@
+{
+  "name": "bitmovin-player-android",
+  "description": "Teach Claude how to integrate the Bitmovin Android Player SDK: setup, player lifecycle, explicit SourceConfig typing with fromUrl fallback, Web UI handlers, media session, cast, and TV variants.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Bitmovin"
+  },
+  "homepage": "https://github.com/bitmovin/skills",
+  "repository": "https://github.com/bitmovin/skills",
+  "license": "MIT",
+  "keywords": [
+    "bitmovin",
+    "android",
+    "player-sdk",
+    "video",
+    "streaming",
+    "hls",
+    "dash",
+    "pip",
+    "cast"
+  ]
+}

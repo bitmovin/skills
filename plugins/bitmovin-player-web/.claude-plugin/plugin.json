@@ -1,0 +1,20 @@
+{
+  "name": "bitmovin-player-web",
+  "description": "Teach Claude how to integrate the Bitmovin Web Player (v8 and Player Web X) end-to-end: setup, DRM, ads, analytics, subtitles, network hooks, and framework integration patterns.",
+  "version": "0.4.0",
+  "author": {
+    "name": "Bitmovin"
+  },
+  "homepage": "https://github.com/bitmovin/skills",
+  "repository": "https://github.com/bitmovin/skills",
+  "license": "MIT",
+  "keywords": [
+    "bitmovin",
+    "video",
+    "streaming",
+    "hls",
+    "dash",
+    "drm",
+    "web-player"
+  ]
+}
