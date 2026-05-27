@@ -5,10 +5,22 @@
   },
   "plugins": [
     {
+      "name": "bitmovin",
+      "source": "./plugins/bitmovin",
+      "description": "Hub skill for Bitmovin video infrastructure. Routes to Player, Encoding, Observability, AI Scene Analysis, Streams, and Stream Lab; walks through MCP/CLI/SDK setup.",
+      "version": "0.1.0"
+    },
+    {
       "name": "bitmovin-player-web",
-      "source": "./",
+      "source": "./plugins/bitmovin-player-web",
       "description": "Bitmovin Player Web SDK integration skill for Claude Code (v8 and Player Web X).",
       "version": "0.4.0"
+    },
+    {
+      "name": "bitmovin-player-android",
+      "source": "./plugins/bitmovin-player-android",
+      "description": "Bitmovin Android Player SDK integration skill for Claude Code (setup, lifecycle, SourceConfig, PiP, media session, cast, TV).",
+      "version": "0.1.0"
     },
     {
       "name": "bitmovin-encoding-live",

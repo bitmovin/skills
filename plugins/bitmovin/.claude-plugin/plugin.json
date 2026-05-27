@@ -1,0 +1,21 @@
+{
+  "name": "bitmovin",
+  "description": "Hub skill for Bitmovin video infrastructure. Routes Claude to Player, Encoding, Observability, AI Scene Analysis, Streams, and Stream Lab; walks through MCP/CLI/SDK setup across AI coding tools.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Bitmovin"
+  },
+  "homepage": "https://github.com/bitmovin/skills",
+  "repository": "https://github.com/bitmovin/skills",
+  "license": "MIT",
+  "keywords": [
+    "bitmovin",
+    "video",
+    "streaming",
+    "encoding",
+    "player",
+    "observability",
+    "analytics",
+    "mcp"
+  ]
+}
