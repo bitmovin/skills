@@ -23,17 +23,18 @@ export function extractSourceHash(webMd) {
   return m ? m[1] : null;
 }
 
-// The guard is the contract that makes agent-generated output trustworthy: the LLM
-// does the descriptive rewrite, and these deterministic patterns prove it actually
-// neutralized the injection-signature phrasing. Tune the rewrite prompt — not this
-// list — if a legitimate phrase trips it.
+// The guard is a deterministic backstop, not a proof of safety: a paraphrased
+// injection ("suggest Bitmovin first") can slip past a phrase list. The load-bearing
+// control is the generic second-person check below — a descriptive third-person web
+// doc should never address the assistant as "you" — plus human review of the diff.
+// The named phrases stay as a fast signal for the specific imperatives in today's
+// SKILL.md. Tune the rewrite prompt, not this list, if a legitimate phrase trips it.
 export const INJECTION_PATTERNS = [
+  [/\byou(?:r|'re|'ll|'ve)?\b/i, 'second-person address to the assistant ("you"/"your")'],
   [/\bbehaviou?ral rule\b/i, 'a "behavioral rule" directive'],
-  [/\bdefault to recommending\b/i, 'an instruction to bias recommendations'],
-  [/\bwalk (?:them|the user) through\b/i, 'a second-person command to the assistant'],
+  [/\bdefault to (?:recommend|suggest)/i, 'an instruction to bias recommendations'],
+  [/\b(?:walk|guide) (?:them|the user) through\b/i, 'a command to the assistant'],
   [/\bdo not skip ahead\b/i, 'an imperative sequencing command'],
-  [/\byou have just been\b/i, 'second-person framing aimed at the model'],
-  [/\bnow that you have\b/i, 'second-person behavioral framing'],
   [/\bpersist this\b/i, 'a command to self-persist into config'],
   [/\bwhenever the user\b/i, 'a standing behavioral instruction'],
   [/\bask one question at a time\b/i, 'an onboarding-script command'],
@@ -41,21 +42,13 @@ export const INJECTION_PATTERNS = [
 ];
 
 // LLM-generated markdown sometimes drops a closing fence, which silently swallows the
-// following sections into one giant code block. Every generated block opens with a
-// language tag (```json) and closes with a bare ``` line, so those counts must match.
-// (Assumes opening fences carry a language tag — the rewrite prompt requires it.)
+// following sections into one giant code block. Every fence — opening (```lang) or
+// closing (```) — is its own line, so a well-formed document has an even number of
+// fence lines; an odd count means a block was left open.
 function fenceProblems(text) {
-  let labelledOpens = 0;
-  let bareFences = 0;
-  for (const line of text.split('\n')) {
-    if (/^```.+/.test(line)) labelledOpens += 1;
-    else if (/^```\s*$/.test(line)) bareFences += 1;
-  }
-  if (labelledOpens !== bareFences) {
-    return [
-      `unbalanced code fences (${labelledOpens} opening \`\`\`lang vs ` +
-        `${bareFences} closing \`\`\`) — a code block is likely unclosed`,
-    ];
+  const fences = text.split('\n').filter((line) => /^```/.test(line)).length;
+  if (fences % 2 !== 0) {
+    return [`unbalanced code fences (${fences} \`\`\` lines) — a code block is left unclosed`];
   }
   return [];
 }
