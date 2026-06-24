@@ -1,0 +1,28 @@
+name: web-skill
+
+# Fails if worker/src/skill-web.md is out of sync with SKILL.md / the rewrite prompt,
+# or if it carries injection-signature phrasing. Pure Node, no API key — regeneration
+# (which needs the key) is a local step: `npm run build:web-skill`.
+on:
+  pull_request:
+    paths:
+      - 'skills/bitmovin/SKILL.md'
+      - 'scripts/**'
+      - 'worker/src/skill-web.md'
+  push:
+    branches: [main]
+    paths:
+      - 'skills/bitmovin/SKILL.md'
+      - 'scripts/**'
+      - 'worker/src/skill-web.md'
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: node --test scripts/web-skill-lib.test.mjs
+      - run: node scripts/check-web-skill.mjs

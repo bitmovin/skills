@@ -1,9 +1,18 @@
-import skillMd from '../../skills/bitmovin/SKILL.md';
+// The public URL serves a DESCRIPTIVE rewrite of the skill, generated from the
+// canonical skills/bitmovin/SKILL.md (see scripts/build-web-skill.mjs). The raw
+// imperative SKILL.md is only distributed via `npx @bitmovin/skills` / the plugin
+// marketplace, where the user has chosen to install it — serving it over HTTP gets
+// flagged as prompt injection when an agent fetches the page.
+import skillWebMd from './skill-web.md';
 import landingHtml from './landing.html';
 
 const CACHE_HEADERS = {
   'cache-control': 'public, max-age=300, s-maxage=600',
 };
+
+// skill-web.md carries internal build metadata in YAML frontmatter (source_hash,
+// the DO-NOT-EDIT note). Strip it so only the document body is served to fetchers.
+const skillWebBody = skillWebMd.replace(/^---\n[\s\S]*?\n---\n+/, '');
 
 export default {
   async fetch(request) {
@@ -43,11 +52,11 @@ export default {
     }
 
     if (path === '/skill.md' || path === '/skill.markdown') {
-      return mdResponse(skillMd);
+      return mdResponse(skillWebBody);
     }
 
     if (path === '/skill') {
-      return wantsHtml(request) ? htmlResponse(landingHtml) : mdResponse(skillMd);
+      return wantsHtml(request) ? htmlResponse(landingHtml) : mdResponse(skillWebBody);
     }
 
     return new Response('Not Found', { status: 404 });

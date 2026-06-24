@@ -6,6 +6,11 @@
   "bin": {
     "bitmovin-skills": "./bin/cli.js"
   },
+  "scripts": {
+    "build:web-skill": "node scripts/build-web-skill.mjs",
+    "check:web-skill": "node scripts/check-web-skill.mjs",
+    "test": "node --test scripts/web-skill-lib.test.mjs"
+  },
   "files": [
     "bin/",
     "src/",
