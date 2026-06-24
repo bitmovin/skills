@@ -24,4 +24,5 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+      - run: node --test scripts/web-skill-lib.test.mjs
       - run: node scripts/check-web-skill.mjs

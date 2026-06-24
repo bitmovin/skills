@@ -31,9 +31,14 @@ const userPrompt =
   skillMd +
   '\n</skill_md>';
 
-// Run the headless `claude` CLI as a pure text transform: the rewrite contract fully
-// replaces Claude Code's default system prompt, and the empty tool allowlist denies it
-// file and shell access. Returns the trimmed body; exits on a fatal CLI/auth error.
+// Run the headless `claude` CLI as a pure text transform. Safety rests on the trusted
+// input (our own SKILL.md) and the rewrite contract fully replacing Claude Code's default
+// system prompt; as defense-in-depth we also deny every built-in tool so the run can't
+// touch the filesystem, shell, or network. (An *empty* `--allowedTools ''` is ignored by
+// the CLI and does NOT restrict tools — `--disallowedTools` is what actually denies them.)
+// Returns the trimmed body; exits on a fatal CLI/auth error.
+const DENIED_TOOLS = 'Bash,Edit,Write,Read,NotebookEdit,Glob,Grep,WebFetch,WebSearch,Agent,Task';
+
 function generate() {
   const result = spawnSync(
     'claude',
@@ -43,8 +48,8 @@ function generate() {
       MODEL,
       '--system-prompt',
       promptMd,
-      '--allowedTools',
-      '',
+      '--disallowedTools',
+      DENIED_TOOLS,
       '--output-format',
       'text',
     ],

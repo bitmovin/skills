@@ -12,8 +12,11 @@ export const PROMPT_PATH = resolve(here, 'web-skill-prompt.md');
 export const OUT_PATH = resolve(repoRoot, 'worker/src/skill-web.md');
 export const FRONTMATTER_NAME = 'bitmovin';
 
-// sha256(SKILL.md + prompt). Embedded in the generated file's frontmatter so the
-// staleness check is deterministic and needs no API key.
+// sha256 of the *inputs* (SKILL.md + prompt), not of the generated skill-web.md body.
+// Embedded in the generated file's frontmatter so the staleness check is deterministic
+// and needs no API key. Note this detects input drift only — it does not bind the
+// committed body to those inputs, so a hand-edited skill-web.md with a valid hash still
+// passes the staleness check (it's then gated only by runGuard + human review).
 export function computeSourceHash(skillMd, promptMd) {
   return createHash('sha256').update(skillMd).update('\n--prompt--\n').update(promptMd).digest('hex');
 }
@@ -45,6 +48,10 @@ export const INJECTION_PATTERNS = [
 // following sections into one giant code block. Every fence — opening (```lang) or
 // closing (```) — is its own line, so a well-formed document has an even number of
 // fence lines; an odd count means a block was left open.
+//
+// This is a coarse backstop, not a real parser: an even count doesn't prove correct
+// pairing, and `/^```/` ignores indented fences. It's sufficient here only because the
+// rewrite prompt bans fenced blocks entirely (expected count: 0) — it leans on that rule.
 function fenceProblems(text) {
   const fences = text.split('\n').filter((line) => /^```/.test(line)).length;
   if (fences % 2 !== 0) {

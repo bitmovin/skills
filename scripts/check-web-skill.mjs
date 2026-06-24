@@ -43,4 +43,5 @@ if (!actual) {
 for (const v of runGuard(webMd)) fail(`injection signature: ${v}`);
 
 if (failed) process.exit(1);
-console.error('✓ web skill is in sync and passes the injection-signature guard');
+// Success → stdout; failures above go to stderr.
+console.log('✓ web skill is in sync and passes the injection-signature guard');

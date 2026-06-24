@@ -10,6 +10,10 @@ const CACHE_HEADERS = {
   'cache-control': 'public, max-age=300, s-maxage=600',
 };
 
+// skill-web.md carries internal build metadata in YAML frontmatter (source_hash,
+// the DO-NOT-EDIT note). Strip it so only the document body is served to fetchers.
+const skillWebBody = skillWebMd.replace(/^---\n[\s\S]*?\n---\n+/, '');
+
 export default {
   async fetch(request) {
     const url = new URL(request.url);
@@ -48,11 +52,11 @@ export default {
     }
 
     if (path === '/skill.md' || path === '/skill.markdown') {
-      return mdResponse(skillWebMd);
+      return mdResponse(skillWebBody);
     }
 
     if (path === '/skill') {
-      return wantsHtml(request) ? htmlResponse(landingHtml) : mdResponse(skillWebMd);
+      return wantsHtml(request) ? htmlResponse(landingHtml) : mdResponse(skillWebBody);
     }
 
     return new Response('Not Found', { status: 404 });
