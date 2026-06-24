@@ -1,6 +1,6 @@
 {
   "name": "@bitmovin/skills",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Install Bitmovin's AI skill into Claude Code, Cursor, Windsurf, GitHub Copilot, and other AI coding tools with one command.",
   "type": "module",
   "bin": {
