@@ -1,0 +1,42 @@
+{
+  "name": "bitmovin-observability-ad-report",
+  "version": "0.1.0",
+  "description": "Portable Bitmovin ad operations report skill packaged for Codex as a local plugin.",
+  "author": {
+    "name": "Bitmovin",
+    "url": "https://github.com/bitmovin/skills"
+  },
+  "homepage": "https://github.com/bitmovin/skills",
+  "repository": "https://github.com/bitmovin/skills",
+  "license": "MIT",
+  "keywords": [
+    "bitmovin",
+    "analytics",
+    "observability",
+    "advertising",
+    "vast",
+    "ad-funnel",
+    "video",
+    "codex-plugin"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Bitmovin Ad Operations Report",
+    "shortDescription": "Build a snapshot ad ops report for a Bitmovin Analytics license",
+    "longDescription": "Produces a snapshot-style ad operations report for a Bitmovin Analytics license. Builds the impression→start→quartile→completion funnel, ranks advertisers and ad systems, flags VAST and ad-server errors, evaluates pod-position cohorts, and summarizes ad startup latency as structured anomaly flags, returning a single AdOpsReport object.",
+    "developerName": "Bitmovin",
+    "category": "Coding",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/bitmovin/skills",
+    "defaultPrompt": [
+      "Build an ad ops report for this Bitmovin license",
+      "Show me the VAST error breakdown for last week",
+      "How are our ads doing — funnel and advertiser performance"
+    ],
+    "brandColor": "#1730E7"
+  }
+}

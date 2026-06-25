@@ -19,7 +19,7 @@ This repo is intentionally **not tied to Claude Code only**:
 | [`bitmovin-player-android`](skills/bitmovin-player-android/SKILL.md) | Available | Bitmovin Android Player SDK integration and troubleshooting |
 | [`bitmovin-encoding-vod`](skills/bitmovin-encoding-vod/SKILL.md) | Available | VOD encoding with the Bitmovin Encoding API (H.264 per-title, fixed ladder, AV1 UGC, hardware-accelerated sports clips) via the Encoding Templates API |
 | [`bitmovin-encoding-live`](skills/bitmovin-encoding-live/SKILL.md) | Available | Live encoding with the Bitmovin Encoding API (RTMP, redundant RTMP, SRT) via the Encoding Templates API |
-| `bitmovin-observability` | Planned | Bitmovin Analytics and observability tooling |
+| [`bitmovin-observability-ad-report`](skills/bitmovin-observability-ad-report/SKILL.md) | Available | Snapshot ad operations report for a Bitmovin Analytics license — funnel, advertiser/ad-system rankings, VAST error breakdowns, ad startup-latency anomaly flags |
 | `video-development` | Planned | General video development guidance (codecs, packaging, DRM, streaming protocols) not specific to Bitmovin |
 
 The sections below describe install paths shared by all skills in this repo. Skill-specific details live inside each skill's directory.
