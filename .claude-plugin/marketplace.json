@@ -33,6 +33,12 @@
       "source": "./plugins/bitmovin-encoding-vod",
       "description": "Bitmovin VOD encoding skill for Claude Code (H.264 per-title, fixed ladder, AV1 UGC, hardware-accelerated sports clips) via the Encoding Templates API.",
       "version": "0.1.0"
+    },
+    {
+      "name": "bitmovin-observability-ad-report",
+      "source": "./plugins/bitmovin-observability-ad-report",
+      "description": "Bitmovin ad operations report skill for Claude Code — impression→start→quartile→completion funnel, advertiser/ad-system rankings, VAST error breakdowns, and ad startup-latency anomaly flags.",
+      "version": "0.1.0"
     }
   ]
 }
