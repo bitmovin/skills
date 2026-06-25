@@ -1,0 +1,23 @@
+{
+  "name": "bitmovin-observability-collector-integration",
+  "description": "Teach Claude how to integrate the Bitmovin Observability (Analytics) collector into any video player on any platform: Web, Android/Fire TV, iOS/tvOS/visionOS, and Roku, for both the Bitmovin Player and third-party engines (HLS.js, Shaka, Video.js, HTML5, ExoPlayer, Media3, AVPlayer, THEOplayer, CAFv3), including the attach/detach lifecycle and why analytics data may be missing or wrong.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Bitmovin"
+  },
+  "homepage": "https://github.com/bitmovin/skills",
+  "repository": "https://github.com/bitmovin/skills",
+  "license": "MIT",
+  "keywords": [
+    "bitmovin",
+    "analytics",
+    "observability",
+    "collector",
+    "qoe",
+    "web",
+    "android",
+    "ios",
+    "roku",
+    "video"
+  ]
+}

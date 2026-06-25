@@ -1,0 +1,43 @@
+{
+  "name": "bitmovin-observability-root-cause-analysis",
+  "version": "0.1.0",
+  "description": "Portable Bitmovin QoE root-cause-analysis skill packaged for Codex as a local plugin.",
+  "author": {
+    "name": "Bitmovin",
+    "url": "https://github.com/bitmovin/skills"
+  },
+  "homepage": "https://github.com/bitmovin/skills",
+  "repository": "https://github.com/bitmovin/skills",
+  "license": "MIT",
+  "keywords": [
+    "bitmovin",
+    "analytics",
+    "observability",
+    "qoe",
+    "root-cause-analysis",
+    "rebuffering",
+    "startup-time",
+    "video",
+    "codex-plugin"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Bitmovin QoE Root-Cause Analysis",
+    "shortDescription": "Find out why a video QoE metric moved using Bitmovin Observability",
+    "longDescription": "Runs root-cause analysis for a video QoE metric that moved — startup time, rebuffer ratio, error rate, bitrate, or video-start-failures — using the Bitmovin Observability MCP. Drives a disciplined Define→Gather→Reflect→Conclude investigation with mix-vs-rate (Simpson's paradox) protection and a falsification step, producing a structured findings object that explains the delta between two windows or cohorts.",
+    "developerName": "Bitmovin",
+    "category": "Coding",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/bitmovin/skills",
+    "defaultPrompt": [
+      "Why is rebuffering up in APAC this week?",
+      "Did the v11 release regress startup time?",
+      "What happened to error rate on Tuesday?"
+    ],
+    "brandColor": "#1730E7"
+  }
+}
