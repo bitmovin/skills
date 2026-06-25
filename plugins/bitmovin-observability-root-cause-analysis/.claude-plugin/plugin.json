@@ -1,0 +1,21 @@
+{
+  "name": "bitmovin-observability-root-cause-analysis",
+  "description": "Teach Claude how to run root-cause analysis on a video QoE metric that moved — startup time, rebuffer ratio, error rate, bitrate, video-start-failures — using the Bitmovin Observability MCP. Drives a disciplined Define→Gather→Reflect→Conclude investigation with mix-vs-rate (Simpson's paradox) protection and a falsification step, producing a structured findings object.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Bitmovin"
+  },
+  "homepage": "https://github.com/bitmovin/skills",
+  "repository": "https://github.com/bitmovin/skills",
+  "license": "MIT",
+  "keywords": [
+    "bitmovin",
+    "analytics",
+    "observability",
+    "qoe",
+    "root-cause-analysis",
+    "rebuffering",
+    "startup-time",
+    "video"
+  ]
+}

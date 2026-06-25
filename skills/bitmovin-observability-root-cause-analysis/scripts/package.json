@@ -1,0 +1,11 @@
+{
+  "name": "qoe-rca-scripts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Deterministic numeric helpers for the QoE RCA skill. Runtime has no dependencies; the decomposition module is a prototype of the explainChange MCP tool.",
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}

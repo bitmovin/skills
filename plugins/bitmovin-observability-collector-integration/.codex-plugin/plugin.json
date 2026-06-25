@@ -1,0 +1,45 @@
+{
+  "name": "bitmovin-observability-collector-integration",
+  "version": "0.1.0",
+  "description": "Portable Bitmovin Observability collector setup skill packaged for Codex as a local plugin.",
+  "author": {
+    "name": "Bitmovin",
+    "url": "https://github.com/bitmovin/skills"
+  },
+  "homepage": "https://github.com/bitmovin/skills",
+  "repository": "https://github.com/bitmovin/skills",
+  "license": "MIT",
+  "keywords": [
+    "bitmovin",
+    "analytics",
+    "observability",
+    "collector",
+    "qoe",
+    "web",
+    "android",
+    "ios",
+    "roku",
+    "video",
+    "codex-plugin"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Bitmovin Observability Collector Integration",
+    "shortDescription": "Integrate the Bitmovin Analytics collector into any player on any platform",
+    "longDescription": "Integrates the Bitmovin Observability (Analytics) collector into any video player on any platform: Web, Android/Fire TV, iOS/tvOS/visionOS, and Roku, for both the Bitmovin Player and third-party engines (HLS.js, Shaka, Video.js, HTML5, ExoPlayer, Media3, AVPlayer, THEOplayer, CAFv3). Covers the managed attach/detach lifecycle third-party players require, verification of incoming data, and why analytics data may be missing, empty, or wrong after integrating.",
+    "developerName": "Bitmovin",
+    "category": "Coding",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/bitmovin/skills",
+    "defaultPrompt": [
+      "Set up the Bitmovin Analytics collector in this app",
+      "Add analytics to my Shaka player",
+      "Why is my Bitmovin analytics data empty after integrating?"
+    ],
+    "brandColor": "#1730E7"
+  }
+}

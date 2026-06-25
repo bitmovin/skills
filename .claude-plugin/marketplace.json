@@ -33,6 +33,18 @@
       "source": "./plugins/bitmovin-encoding-vod",
       "description": "Bitmovin VOD encoding skill for Claude Code (H.264 per-title, fixed ladder, AV1 UGC, hardware-accelerated sports clips) via the Encoding Templates API.",
       "version": "0.1.0"
+    },
+    {
+      "name": "bitmovin-observability-collector-integration",
+      "source": "./plugins/bitmovin-observability-collector-integration",
+      "description": "Bitmovin Observability (Analytics) collector setup skill for Claude Code — Web, Android/Fire TV, iOS/tvOS/visionOS, and Roku, for the Bitmovin Player and third-party engines.",
+      "version": "0.1.0"
+    },
+    {
+      "name": "bitmovin-observability-root-cause-analysis",
+      "source": "./plugins/bitmovin-observability-root-cause-analysis",
+      "description": "Bitmovin QoE root-cause-analysis skill for Claude Code — explains why startup time, rebuffer ratio, error rate, bitrate, or video-start-failures moved, via the Bitmovin Observability MCP.",
+      "version": "0.1.0"
     }
   ]
 }
