@@ -442,18 +442,18 @@ const BitmovinPlayer = dynamic(() => import('./BitmovinPlayer'), { ssr: false })
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
-import { Player } from 'bitmovin-player';
+  import { ref, onMounted, onUnmounted } from 'vue';
+  import { Player } from 'bitmovin-player';
 
-const container = ref(null);
-let player = null;
+  const container = ref(null);
+  let player = null;
 
-onMounted(async () => {
-  player = new Player(container.value, { key: 'YOUR_KEY' });
-  await player.load({ hls: 'https://example.com/stream.m3u8' });
-});
+  onMounted(async () => {
+    player = new Player(container.value, { key: 'YOUR_KEY' });
+    await player.load({ hls: 'https://example.com/stream.m3u8' });
+  });
 
-onUnmounted(() => player?.destroy());
+  onUnmounted(() => player?.destroy());
 </script>
 ```
 
@@ -494,7 +494,7 @@ import ContainerMP4Module from 'bitmovin-player/modules/bitmovinplayer-container
 import PolyfillModule from 'bitmovin-player/modules/bitmovinplayer-polyfill';
 
 [EngineBitmovinModule, MseRendererModule, HlsModule, AbrModule,
- ContainerTSModule, ContainerMP4Module, PolyfillModule]
+  ContainerTSModule, ContainerMP4Module, PolyfillModule]
   .forEach(m => Player.addModule(m));
 ```
 
@@ -536,7 +536,7 @@ Use these public streams for development and testing:
 
 Player Web X is Bitmovin's next-generation web player built on the **Phoenix Framework** — a from-scratch architecture with structured concurrency, an effect system, and a package-first design. It is modular, extensible, and produces smaller bundles than v8.
 
-**Last verified:** 2026-04-15 against the PWX getting started guide, v8 compatibility guide, support matrix, and package docs.
+**Last verified:** 2026-07-02 against PWX 10.2.0 (getting started guide, v8 compatibility guide, support matrix, and package docs).
 
 **Status:** PWX is in active development and its capability surface is volatile. Use v8 for production by default unless the user explicitly needs PWX's package architecture or is validating PWX itself.
 
@@ -544,17 +544,20 @@ Player Web X is Bitmovin's next-generation web player built on the **Phoenix Fra
 
 - HLS playback
 - DASH playback (partially supported)
+- Progressive playback (played by the native `<video>` element, e.g. MP4)
+- Multi-technology sources: a single source can list several resources of different types (`hls`/`dash`/`progressive`) and PWX selects the one it can play in the current environment
 - Sources API / multi-source workflows
 - Load control and view mode packages
 - WebVTT subtitles
+- Advertising: VAST ad scheduling (VMAP is experimental)
 - Optional analytics package support
 - v8 API compatibility layer (partial)
 
 ## What does NOT work yet in PWX
 
-- DRM and advertising are still incomplete enough that you should verify the live docs before promising them
+- DRM is still incomplete enough that you should verify the live docs before promising it
+- Stable VMAP advertising — VMAP handling is experimental; VAST is the stable path
 - Smooth Streaming — not supported
-- Progressive playback — not supported
 - WebRTC — not supported
 - Network API support is currently marked unsupported in the official support matrix
 - Quality and playback APIs are still marked `Next` in the official support matrix
@@ -603,8 +606,9 @@ const player = Player({
 
 // sources.add() returns a source HANDLE synchronously — it is NOT a promise.
 // Do not `await` it. The handle is where playback control lives.
+// Every resource requires a `type` (as of PWX 10.2.0): 'hls' | 'dash' | 'progressive'.
 const source = player.sources.add({
-  resources: [{ url: 'https://example.com/stream.m3u8' }],
+  resources: [{ url: 'https://example.com/stream.m3u8', type: 'hls' }],
 });
 
 // Trigger playback via the source, not the player. Autoplay config is unreliable;
@@ -623,7 +627,7 @@ player.dispose();  // NOT player.destroy() — that's a v8 name
 | Concern | v8 | PWX (native) |
 |---------|----|-----|
 | Construct player | `new Player(container, config)` | `Player({ defaultContainer, ...config })` (no `new`) |
-| Load a stream | `player.load({ hls: url })` returns a Promise | `player.sources.add({ resources: [{ url }] })` returns a source handle synchronously |
+| Load a stream | `player.load({ hls: url })` returns a Promise | `player.sources.add({ resources: [{ url, type }] })` returns a source handle synchronously |
 | Play / pause | `player.play()`, `player.pause()` | `source.play({ isMuted: true })`, `source.pause()` — lives on the source handle, NOT the player |
 | Subscribe to events | `player.on('playing', fn)` | `source.events.on('playing', fn)` OR `player.events.on(...)` — the player instance has no `.on()` |
 | Dispatch commands | N/A | `player.events.dispatch({ type: 'play', ... })` (event-driven architecture) |
@@ -638,6 +642,8 @@ player.dispose();  // NOT player.destroy() — that's a v8 name
 - `key` — license key (same as v8)
 - `defaultContainer` — DOM element to mount into (v8 passes this as a constructor arg; PWX puts it in config)
 - `playback.muted`, `playback.autoplay` — present in config, but unreliable in current PWX. Prefer explicit `source.play({ isMuted: true })`.
+
+**Resources and `type` (PWX 10.2.0+):** a source's `resources` array replaces v8's `{ hls, dash, progressive }` shortcut. Every resource requires a `type` — `'hls'`, `'dash'`, or `'progressive'` — which routes it to the right technology. Listing multiple resources of different types lets PWX pick the one playable in the current environment (see multi-technology support), but a type only resolves if the bundle includes its technology (`Hls` bundle handles `hls`, `Dash` handles `dash`, `Playback`/`BitmovinV8` handle both; progressive works in any playback bundle).
 
 ## Available bundles
 
@@ -741,6 +747,19 @@ player.packages.add(myCustomPackage);
 ```
 
 See [Creating packages](https://developer.bitmovin.com/playback/docs/player-web-x-creating-packages) for the package authoring guide.
+
+## Advertising (PWX)
+
+Client-side ads are available in the `Playback` and `BitmovinV8` bundles out of the box (or by adding `BitmovinAdvertisingBundlePackage` to a custom bundle). Ads are scheduled **per source**, through the `ads` namespace on the source handle — this is different from v8's `advertising.adBreaks` player config.
+
+```typescript
+source.ads.schedule({
+  tag: { type: 'vast', url: 'https://your-ad-server/vast.xml' },
+  position: 'pre', // 'pre' | 'start' | 'post' | 'end' | seconds (number) | '50%'
+});
+```
+
+VAST 4.x is the stable path; **VMAP support is experimental** — prefer VAST for production. Ad lifecycle events (`ad-started`, `ad-finished`, `ad-quartile`, `ad-skipped`, ...) are delivered on `source.events`, and the active ad is available via `source.ads.getActiveAd()`.
 
 ## Reference links (PWX)
 
