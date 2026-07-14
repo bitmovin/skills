@@ -1,0 +1,16 @@
+{
+  "name": "ad-ops-report-scripts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Deterministic numeric helpers for the Bitmovin ad operations snapshot-report skill. Pure scripts: agent assembles inputs, scripts return numbers and classifications.",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}
