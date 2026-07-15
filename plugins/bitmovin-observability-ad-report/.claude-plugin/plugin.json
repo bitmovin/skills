@@ -1,0 +1,22 @@
+{
+  "name": "bitmovin-observability-ad-report",
+  "description": "Teach Claude how to produce a snapshot-style ad operations report for a Bitmovin Analytics license — the impression→start→quartile→completion funnel, advertiser and ad-system rankings, VAST/ad-server error breakdowns, pod-position cohorts, and ad startup-latency anomaly flags (AdOpsReport object) — via the Bitmovin Observability MCP. The agent decides and frames; tested scripts compute the funnel, concentration ranking, and threshold checks.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Bitmovin"
+  },
+  "homepage": "https://github.com/bitmovin/skills",
+  "repository": "https://github.com/bitmovin/skills",
+  "license": "MIT",
+  "keywords": [
+    "bitmovin",
+    "analytics",
+    "observability",
+    "ads",
+    "ad-ops",
+    "vast",
+    "ad-funnel",
+    "advertiser",
+    "video"
+  ]
+}

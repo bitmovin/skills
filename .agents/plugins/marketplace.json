@@ -75,6 +75,42 @@
         "authentication": "ON_INSTALL"
       },
       "category": "Coding"
+    },
+    {
+      "name": "bitmovin-observability-collector-integration",
+      "source": {
+        "source": "local",
+        "path": "./plugins/bitmovin-observability-collector-integration"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Coding"
+    },
+    {
+      "name": "bitmovin-observability-root-cause-analysis",
+      "source": {
+        "source": "local",
+        "path": "./plugins/bitmovin-observability-root-cause-analysis"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Coding"
+    },
+    {
+      "name": "bitmovin-observability-ad-report",
+      "source": {
+        "source": "local",
+        "path": "./plugins/bitmovin-observability-ad-report"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Coding"
     }
   ]
 }

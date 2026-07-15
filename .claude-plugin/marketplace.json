@@ -45,6 +45,12 @@
       "source": "./plugins/bitmovin-observability-root-cause-analysis",
       "description": "Bitmovin QoE root-cause-analysis skill for Claude Code — explains why startup time, rebuffer ratio, error rate, bitrate, or video-start-failures moved, via the Bitmovin Observability MCP.",
       "version": "0.1.0"
+    },
+    {
+      "name": "bitmovin-observability-ad-report",
+      "source": "./plugins/bitmovin-observability-ad-report",
+      "description": "Bitmovin ad-operations report skill for Claude Code — builds the impression→start→quartile→completion funnel, ranks advertisers and ad systems, breaks down VAST/ad-server errors, evaluates pod-position cohorts, and flags ad startup-latency anomalies (AdOpsReport object), via the Bitmovin Observability MCP.",
+      "version": "0.1.0"
     }
   ]
 }

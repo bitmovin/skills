@@ -1,0 +1,44 @@
+{
+  "name": "bitmovin-observability-ad-report",
+  "version": "0.1.0",
+  "description": "Portable Bitmovin ad-operations report skill packaged for Codex as a local plugin.",
+  "author": {
+    "name": "Bitmovin",
+    "url": "https://github.com/bitmovin/skills"
+  },
+  "homepage": "https://github.com/bitmovin/skills",
+  "repository": "https://github.com/bitmovin/skills",
+  "license": "MIT",
+  "keywords": [
+    "bitmovin",
+    "analytics",
+    "observability",
+    "ads",
+    "ad-ops",
+    "vast",
+    "ad-funnel",
+    "advertiser",
+    "video",
+    "codex-plugin"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Bitmovin Ad Operations Report",
+    "shortDescription": "Snapshot ad ops report for a Bitmovin Analytics license",
+    "longDescription": "Produces a structured, single-window ad-operations report for a Bitmovin Analytics license: the impression→start→quartile→completion funnel, advertiser and ad-system rankings, VAST/ad-server error breakdowns, pod-position cohorts, and ad startup-latency anomaly flags (AdOpsReport object), via the Bitmovin Observability MCP. The agent constructs queries and writes the narrative; tested scripts compute funnel drop-offs, concentration ranking, and threshold checks so the numbers are auditable. Does NOT explain why a metric moved between two windows — that belongs to the QoE root-cause-analysis skill.",
+    "developerName": "Bitmovin",
+    "category": "Coding",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/bitmovin/skills",
+    "defaultPrompt": [
+      "Give me a weekly ad ops report for this license",
+      "How are our ads doing this week?",
+      "Break down our VAST errors by advertiser and ad system"
+    ],
+    "brandColor": "#1730E7"
+  }
+}
