@@ -7,7 +7,7 @@
     {
       "name": "bitmovin",
       "source": "./plugins/bitmovin",
-      "description": "Hub skill for Bitmovin video infrastructure. Routes to Player, Encoding, Observability, AI Scene Analysis, Streams, and Stream Lab; walks through MCP/CLI/SDK setup.",
+      "description": "Hub skill for Bitmovin video infrastructure. Routes to Player, Player Web X, VOD Encoder, Live Encoder, Observability, Advertising Observability, AI Scene Analysis, and Stream Lab; walks through MCP server, CLI, and SDK setup.",
       "version": "0.1.0"
     },
     {
@@ -37,7 +37,7 @@
     {
       "name": "bitmovin-observability-collector-integration",
       "source": "./plugins/bitmovin-observability-collector-integration",
-      "description": "Bitmovin Observability (Analytics) collector setup skill for Claude Code — Web, Android/Fire TV, iOS/tvOS/visionOS, and Roku, for the Bitmovin Player and third-party engines.",
+      "description": "Bitmovin Observability (formerly Analytics) collector setup skill for Claude Code — Web, Android/Fire TV, iOS/tvOS/visionOS, and Roku, for the Bitmovin Player and third-party engines.",
       "version": "0.1.0"
     },
     {

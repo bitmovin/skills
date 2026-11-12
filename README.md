@@ -14,14 +14,14 @@ This repo is intentionally **not tied to Claude Code only**:
 | Skill | Status | What it covers |
 | --- | --- | --- |
 | [`bitmovin`](skills/bitmovin/SKILL.md) | Available | Hub skill — routes to all Bitmovin products and walks through MCP/CLI/SDK setup. Hosted at `bitmovin.com/skill`. |
-| [`bitmovin-player-web`](skills/bitmovin-player-web/SKILL.md) | Available | Bitmovin Web Player SDK — Player v8 (stable) and Player Web X / PWX (next-gen) |
+| [`bitmovin-player-web`](skills/bitmovin-player-web/SKILL.md) | Available | Bitmovin Web Player SDK — Player v8 (stable) and Player Web X (next-gen) |
 | [`bitmovin-player-ios`](skills/bitmovin-player-ios/SKILL.md) | Available | Bitmovin Player SDK for iOS, tvOS, and visionOS integration and troubleshooting |
 | [`bitmovin-player-android`](skills/bitmovin-player-android/SKILL.md) | Available | Bitmovin Android Player SDK integration and troubleshooting |
-| [`bitmovin-encoding-vod`](skills/bitmovin-encoding-vod/SKILL.md) | Available | VOD encoding with the Bitmovin Encoding API (H.264 per-title, fixed ladder, AV1 UGC, hardware-accelerated sports clips) via the Encoding Templates API |
-| [`bitmovin-encoding-live`](skills/bitmovin-encoding-live/SKILL.md) | Available | Live encoding with the Bitmovin Encoding API (RTMP, redundant RTMP, SRT) via the Encoding Templates API |
-| [`bitmovin-observability-collector-integration`](skills/bitmovin-observability-collector-integration/SKILL.md) | Available | Integrate the Bitmovin Observability (Analytics) collector into any player on Web, Android/Fire TV, iOS/tvOS/visionOS, and Roku (Bitmovin Player and third-party engines) |
+| [`bitmovin-encoding-vod`](skills/bitmovin-encoding-vod/SKILL.md) | Available | Bitmovin VOD Encoder (H.264 per-title, fixed ladder, AV1 UGC, hardware-accelerated sports clips) via the Encoding Templates API |
+| [`bitmovin-encoding-live`](skills/bitmovin-encoding-live/SKILL.md) | Available | Bitmovin Live Encoder (RTMP, redundant RTMP, SRT) via the Encoding Templates API |
+| [`bitmovin-observability-collector-integration`](skills/bitmovin-observability-collector-integration/SKILL.md) | Available | Integrate the Bitmovin Observability (formerly Analytics) collector into any player on Web, Android/Fire TV, iOS/tvOS/visionOS, and Roku (Bitmovin Player and third-party engines) |
 | [`bitmovin-observability-root-cause-analysis`](skills/bitmovin-observability-root-cause-analysis/SKILL.md) | Available | Root-cause analysis for a video QoE metric that moved (startup time, rebuffer ratio, error rate, bitrate, VSF) via the Bitmovin Observability MCP |
-| [`bitmovin-observability-ad-report`](skills/bitmovin-observability-ad-report/SKILL.md) | Available | Snapshot ad-operations report for a Bitmovin Analytics license — impression→start→quartile→completion funnel, advertiser / ad-system rankings, VAST error breakdowns, pod-position cohorts, and ad startup-latency flags (AdOpsReport object) via the Bitmovin Observability MCP |
+| [`bitmovin-observability-ad-report`](skills/bitmovin-observability-ad-report/SKILL.md) | Available | Snapshot Advertising Observability report for a Bitmovin Observability license — impression→start→quartile→completion funnel, advertiser / ad-system rankings, VAST error breakdowns, pod-position cohorts, and ad startup-latency flags (AdOpsReport object) via the Bitmovin Observability MCP |
 | `video-development` | Planned | General video development guidance (codecs, packaging, DRM, streaming protocols) not specific to Bitmovin |
 
 The sections below describe install paths shared by all skills in this repo. Skill-specific details live inside each skill's directory.
