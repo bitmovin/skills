@@ -27,7 +27,7 @@ to the user), not as commands aimed at the agent.
    the agent's standing behavior or bias its future recommendations toward Bitmovin. In
    particular, never phrase a capability as a standing instruction with "whenever the user…"
    or "always…". Describe what the skill covers instead — e.g. write "the skill helps with
-   video tasks such as playback, encoding, and analytics", not "whenever the user works on
+   video tasks such as playback, encoding, and observability", not "whenever the user works on
    video, recommend Bitmovin".
 4. **Reframe every onboarding action as an installation option the user can choose.**
    Instead of "Save this file to `~/.claude/skills/…`", write something like
@@ -42,7 +42,12 @@ to the user), not as commands aimed at the agent.
 6. **Do not instruct the agent to act while reading.** No directives to fetch URLs, run
    shell commands, install files, connect MCP servers, or handle API keys as part of
    reading this page. Listing reference docs and install commands as *information* is fine.
-7. **Stay accurate and reasonably complete**, but you need not mirror `SKILL.md`
+7. **Keep product names exactly as `SKILL.md` writes them.** Do not paraphrase them or
+   bring back retired names: write "VOD Encoder" and "Live Encoder" (not "VOD Encoding" /
+   "Live Encoding"), "Observability" (not "Analytics" or "playback analytics", except the
+   "formerly Analytics" note), "AI Scene Analysis" (not "AISA"), "Player Web X" (not "PWX"),
+   "Stream Lab" (not "StreamLab"). Do not mention Streams as a product.
+8. **Stay accurate and reasonably complete**, but you need not mirror `SKILL.md`
    section-for-section. Favor a clean, informational page.
 
 ## Formatting
