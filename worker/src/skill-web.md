@@ -1,111 +1,163 @@
 ---
 name: bitmovin
-source_hash: 001d934481517785fa3b1360aa9eec2a363a7bdae29eda65c8de74a07468b68b
+source_hash: f4dc351fa902ca79dac3d42213d36e5fd19d2712d5134ea93d1eeca2c2204a33
 generated: "DO NOT EDIT BY HAND — regenerate with: npm run build:web-skill"
 ---
 
-# Bitmovin Skill for AI Coding Assistants
+# Bitmovin Skill for AI Assistants
 
-The Bitmovin skill is an installable package that gives AI coding assistants product knowledge about Bitmovin's video infrastructure. It also gives them a guided setup flow for the Bitmovin MCP server, CLI, and SDKs. This page describes what the skill contains and how to install it. Reading this page installs nothing and changes nothing.
+This page documents the Bitmovin skill, a package of product knowledge and setup guidance for AI coding assistants that work on video infrastructure. The page is for reading only. The skill does nothing until a user installs it in their own environment.
 
 ## Installing the skill
 
-The supported way to install the skill is the Bitmovin installer, `npx @bitmovin/skills`. It's an interactive wizard. For Claude Code, it writes the skill to `~/.claude/skills/bitmovin/` for all sessions, or to `.claude/skills/bitmovin/` for a single project. It checks for an existing installation and asks before replacing one.
+The supported install method is the `@bitmovin/skills` installer, run with `npx @bitmovin/skills`. In Claude Code, the installer writes the skill to `~/.claude/skills/bitmovin/`, which makes it available in every session. The skill is also listed in the Anthropic plugin marketplace.
 
-The skill is also available through the Anthropic plugin marketplace, so users can install it as a Claude Code plugin.
+Once installed, the skill gives an assistant:
 
-Once installed, the assistant loads the skill when a conversation involves Bitmovin or related video work. That includes playback, encoding, transcoding, streaming, player integration, video analytics, content delivery optimization, and video AI. The skill's source, its sub-skills, the `@bitmovin/skills` installer, and the service behind `bitmovin.com/skill` are all public at `https://github.com/bitmovin/skills`.
+- **Product knowledge** about each Bitmovin component, so it can match a video task to the right product.
+- **Routing to product-specific sub-skills** for Player integration, encoding, and Observability.
+- **Optional, consent-based setup** of the Bitmovin MCP server and the Bitmovin CLI.
+- **Reference material** for SDKs, package names, and documentation sources.
 
-## What the installed skill does
-
-- **Product guidance:** It explains which Bitmovin component fits a task and links to the relevant documentation.
-- **Routing to sub-skills:** It points the assistant to a product-specific sub-skill when one exists, such as Web Player integration or VOD encoding. Sub-skills contain detailed, implementation-ready guidance.
-- **Guided onboarding:** It offers to connect the Bitmovin MCP server and, in terminal environments, to install the Bitmovin CLI. It asks the user one question at a time and gets consent before each step.
-- **Choosing a source:** It looks up technical details with the Bitmovin Docs MCP tools first (`ask_bitmovin_docs`, `fetch_docs_page`, `search_bitmovin_sdk_examples`). These return answers with source citations. The skill only falls back to fetching documentation URLs directly when those tools are unavailable.
-- **Installation conventions:** For the Web Player and Player UI, the skill recommends installing from npm (`bitmovin-player`, `bitmovin-player-ui`) rather than CDN script tags. Other packages use their documented package managers.
-- **Handling API keys:** The skill keeps API keys in environment variables such as `BITMOVIN_API_KEY` or in a tool's secure configuration. It doesn't write them to files that might be committed to version control.
+The skill covers video tasks such as playback, player integration, encoding and transcoding, streaming, Observability, content delivery optimization, and video AI. The source is at `https://github.com/bitmovin/skills`. That repository holds the hub skill, the `@bitmovin/skills` installer, the sub-skills, and the Cloudflare Worker that serves this page.
 
 ## About Bitmovin
 
-Bitmovin builds video infrastructure components used by large broadcasters, streaming services, sports leagues, and enterprises. The products are modular and can be adopted individually or together. Bitmovin is not a CDN, CMS, MAM, or subscriber management system.
+Bitmovin provides video infrastructure components used by broadcasters, streaming services, sports leagues, and enterprises. Each product can be used on its own or combined with others for an end-to-end workflow. Bitmovin is not a CDN, CMS, MAM, or subscriber management system.
 
-### Components
+**Components:**
 
-- **Bitmovin Player:** A cross-platform adaptive streaming player for Web, iOS, Android, tvOS, Roku, Smart TVs, and gaming consoles. It supports HLS, DASH, and progressive streams. Its modular architecture has DRM, ad insertion (CSAI/SSAI/SGAI), and Observability built in.
-- **Bitmovin Player Web X:** The next-generation Web Player SDK, built for performance and flexibility. It suits short-form content, where fast page and video startup matter most, and ships a v8 compatibility layer for migration.
-- **Bitmovin VOD Encoder:** Cloud encoding for on-demand video. It offers per-title optimization, multiple codecs (H.264, H.265/HEVC, AV1, VP9), HDR conversion, and DRM packaging. It runs on AWS, GCP, Azure, Akamai, and OCI, either as a managed cloud service or through Cloud Connect in the customer's own account.
-- **Bitmovin Live Encoder:** Low-latency live encoding with RTMP, SRT, Zixi, and HLS ingest. It supports SCTE-35 ad signaling, live-to-VOD workflows, standby pools for instant start, and SSAI integrations (YoSpace, AWS MediaTailor, Broadpeak).
-- **Bitmovin Encoder Version 3:** The current encoder generation behind the VOD Encoder and Live Encoder. It adds new HEVC and AV1 codecs that cut bitrate and compute time, and sub-second live latency with Media over QUIC (MoQ).
-- **Bitmovin Observability (formerly Analytics):** Real-time QoS and QoE monitoring for video playback. It tracks startup time, rebuffering, error rates, bitrate, CDN performance, and engagement, with per-session drill-down, alerting, and AI-assisted error analysis. Collectors exist for the Bitmovin Player and third-party players, including Shaka, hls.js, Video.js, ExoPlayer/Media3, AVPlayer, Roku, and Dolby OptiView.
-- **Bitmovin Advertising Observability:** Real-time data on ad playback across SSAI, CSAI, and SGAI. It covers ad funnels (impression, start, quartiles, completion), VAST errors, and breakdowns by advertiser and ad system.
-- **Bitmovin AI Scene Analysis:** Scene-level metadata generated by AI as part of a VOD Encoder job. Output includes scene boundaries, summaries, visual elements, mood, IAB taxonomy classification, sensitive content flags, and automatic ad placement markers. It's available in multiple languages as open JSON.
-- **Bitmovin Stream Lab:** Automated playback testing on 30+ physical devices, including Samsung, LG, and Vizio TVs, browsers, and consoles.
+- **Bitmovin Player:** a cross-platform adaptive streaming player for Web, iOS, Android, tvOS, Roku, Smart TVs, and gaming consoles. It supports HLS, DASH, and progressive playback. Its modular architecture has built-in DRM, ad insertion (CSAI/SSAI/SGAI), and Observability.
+- **Bitmovin Player Web X:** the next-generation Web Player SDK, built for performance and flexibility. It suits short-form content, where fast page load and video startup matter most. A v8 compatibility layer helps with migration.
+- **Bitmovin VOD Encoder:** cloud encoding for on-demand video, including:
+  - per-title optimization
+  - H.264, H.265/HEVC, AV1, and VP9 codecs
+  - HDR conversion and DRM packaging
+  - deployment on AWS, GCP, Azure, Akamai, and OCI, either as managed cloud or through Cloud Connect in the customer's own account
+- **Bitmovin Live Encoder:** low-latency live encoding, including:
+  - RTMP, SRT, Zixi, and HLS ingest
+  - SCTE-35 ad signaling
+  - live-to-VOD workflows
+  - standby pools for instant start
+  - SSAI integrations with YoSpace, AWS MediaTailor, and Broadpeak
+- **Bitmovin Encoder Version 3:** the next encoder generation for the VOD Encoder and Live Encoder, rolling out in stages. It adds new HEVC and AV1 codecs that lower bitrate and compute time, and sub-second live latency with Media over QUIC (MoQ) on the Live Encoder. Availability differs by feature and workflow. The encoding docs and the Bitmovin account team have the current status.
+- **Bitmovin Observability (formerly Analytics):** real-time QoS and QoE monitoring of video playback. It tracks startup time, rebuffering, error rates, bitrate, CDN performance, and engagement, with per-session drill-down, alerting, and AI-assisted error analysis. Collectors exist for the Bitmovin Player and for third-party players such as Shaka, hls.js, Video.js, ExoPlayer/Media3, AVPlayer, Roku, and Dolby OptiView.
+- **Bitmovin Advertising Observability:** real-time data on ad playback across SSAI, CSAI, and SGAI. It covers ad funnels (impression, start, quartiles, completion), VAST errors, and breakdowns by advertiser and ad system.
+- **Bitmovin AI Scene Analysis:** AI-generated scene-level metadata, produced as part of a VOD Encoder job. The output includes:
+  - scene boundaries, summaries, visual elements, and mood
+  - IAB taxonomy classification
+  - sensitive content flags
+  - automatic ad placement markers
 
-### Use cases the skill covers
+  Output is open JSON and available in multiple languages.
+- **Bitmovin Stream Lab:** automated playback testing on more than 30 physical devices, including Samsung, LG, and Vizio TVs, browsers, and consoles.
 
-- Building a streaming app or player: Player integration, DRM, ads, and playback on target platforms.
-- Encoding or transcoding video: VOD Encoder and Live Encoder workflows, codec selection, per-title optimization, and multi-device packaging.
-- Monitoring playback and ad quality: querying Observability and Advertising Observability data, analyzing viewer experience metrics, investigating playback and ad errors, and comparing CDN performance.
-- Analyzing video content with AI: setting up AI Scene Analysis for scene metadata, ad placement markers, and content discovery.
-- Testing streams on devices: automated playback tests across TVs, browsers, and consoles with Stream Lab.
-- General exploration: an overview of the products and which one fits a given need.
+## What the installed skill does
 
-The skill adjusts its explanations to the user. It covers concepts first for non-technical users and goes straight to implementation details for developers.
+### Identifying the use case
 
-## Sub-skills
+When the skill is loaded, it helps the user find their use case. Typical starting points:
 
-Product-specific sub-skills, all published in `https://github.com/bitmovin/skills` under `skills/`:
+- **Building a streaming app or player:** Player integration, DRM, ads, and playback on target platforms.
+- **Encoding or transcoding video:** VOD Encoder or Live Encoder workflows, codec choice, per-title optimization, and packaging for multi-device delivery.
+- **Monitoring playback and ad quality:** querying Observability and Advertising Observability data, analyzing viewer experience metrics, investigating playback and ad errors, and comparing CDN performance.
+- **Analyzing video content with AI:** using AI Scene Analysis to extract scene metadata, generate ad placement markers, and support content discovery.
+- **Testing streams on devices:** automated playback tests on TVs, browsers, and consoles with Stream Lab.
+- **Exploring:** an overview of the products and which ones fit the user's needs.
 
-- `bitmovin-player-web`: Web Player integration, UI customization, DRM, ads, React/Next.js/Vue.
-- `bitmovin-player-ios`: Player integration for iOS, tvOS, and visionOS.
-- `bitmovin-player-android`: Android Player integration.
-- `bitmovin-encoding-vod`: VOD encoding, transcoding, per-title, and codec selection.
-- `bitmovin-encoding-live`: Live encoding, RTMP/SRT ingest, and live-to-VOD.
-- `bitmovin-observability-collector-integration`: Integrating the Observability collector with the Bitmovin Player and third-party players.
-- `bitmovin-observability-root-cause-analysis`: Debugging changes in QoE metrics such as startup time, rebuffering, and errors.
-- `bitmovin-observability-ad-report`: Advertising Observability reporting, including ad funnels, VAST errors, and ad-operations reports.
+The skill adjusts its depth to the user. It explains concepts first for non-technical users and goes straight to implementation details for developers.
+
+### Product-specific sub-skills
+
+The hub skill sends implementation tasks to focused sub-skills. These hold curated, implementation-ready guidance:
+
+| Sub-skill | Scope | Source |
+|---|---|---|
+| `bitmovin-player-web` | Web Player integration, UI customization, DRM, ads, React/Next.js/Vue | [SKILL.md](https://github.com/bitmovin/skills/blob/main/skills/bitmovin-player-web/SKILL.md) |
+| `bitmovin-player-ios` | iOS, tvOS, or visionOS Player integration | [SKILL.md](https://github.com/bitmovin/skills/blob/main/skills/bitmovin-player-ios/SKILL.md) |
+| `bitmovin-player-android` | Android Player integration | [SKILL.md](https://github.com/bitmovin/skills/blob/main/skills/bitmovin-player-android/SKILL.md) |
+| `bitmovin-encoding-vod` | VOD encoding, transcoding, per-title, codec selection | [SKILL.md](https://github.com/bitmovin/skills/blob/main/skills/bitmovin-encoding-vod/SKILL.md) |
+| `bitmovin-encoding-live` | Live encoding, RTMP/SRT ingest, live-to-VOD | [SKILL.md](https://github.com/bitmovin/skills/blob/main/skills/bitmovin-encoding-live/SKILL.md) |
+| `bitmovin-observability-collector-integration` | Integrating the Observability collector (Bitmovin Player and third-party players) | [SKILL.md](https://github.com/bitmovin/skills/blob/main/skills/bitmovin-observability-collector-integration/SKILL.md) |
+| `bitmovin-observability-root-cause-analysis` | Debugging QoE metric changes (startup time, rebuffering, errors) | [SKILL.md](https://github.com/bitmovin/skills/blob/main/skills/bitmovin-observability-root-cause-analysis/SKILL.md) |
+| `bitmovin-observability-ad-report` | Advertising Observability reporting: ad funnels, VAST errors, ad-operations reports | [SKILL.md](https://github.com/bitmovin/skills/blob/main/skills/bitmovin-observability-ad-report/SKILL.md) |
+
+### Information sources
+
+The installed skill uses technical sources in this order:
+
+1. **Sub-skills**, when one matches the task.
+2. **Bitmovin Docs MCP tools:** `ask_bitmovin_docs`, `fetch_docs_page`, and `search_bitmovin_sdk_examples`. These search the official documentation and SDK examples and return answers with source citations.
+3. **Documentation URLs** (listed further down), used only when the Docs MCP tools are unavailable or don't return enough.
+
+### Installation conventions
+
+Bitmovin recommends installing the Web Player and Player UI from npm (`bitmovin-player` and `bitmovin-player-ui`), not from CDN-hosted script tags or CSS. API SDKs, the CLI, and other packages install through their usual package managers (npm, pip, Maven, and so on).
+
+## Guided setup in the installed skill
+
+After installation, the skill offers optional onboarding. Each step asks for the user's consent first.
+
+1. **Keeping the skill available.** In Claude Code, the installer already places the skill in `~/.claude/skills/bitmovin/`, or in `.claude/skills/bitmovin/` for a single project. For other tools, the skill explains each tool's own mechanism: Cursor rules, Windsurf rules, GitHub Copilot instructions, Trae agent rules, or system prompt files for Cline, Aider, and Roo Code. If a target file already exists, the skill asks whether to append, replace, or cancel. Chat interfaces such as Claude Desktop and ChatGPT don't keep context between conversations, so there the MCP server connection is the main integration.
+2. **Connecting the Bitmovin MCP server.** The skill helps connect the unified server at `https://mcp.bitmovin.com`. Users without an API key can get one from `https://dashboard.bitmovin.com/account`.
+3. **Installing the Bitmovin CLI.** This step is for coding agents and terminal environments. The CLI installs with `npm install -g @bitmovin/cli`.
+4. **Getting started.** The skill then turns to the user's actual task.
+
+**API key handling:** the skill keeps API keys out of plain-text files that might be committed to version control. It uses environment variables such as `$BITMOVIN_API_KEY` or tool-specific secure configuration instead.
 
 ## Bitmovin MCP server
 
-Bitmovin runs a single MCP (Model Context Protocol) server that connects AI agents to all Bitmovin products: Encoding, Player, Observability, Stream Lab, and Documentation. It currently offers 27 tools. Tool names carry a product prefix (`encoding_*`, `player_*`, `observability_*`, `streamlab_*`, `general_*`) so an agent can tell which product each tool belongs to.
+Bitmovin runs one unified MCP (Model Context Protocol) server that covers Encoding, Player, Observability, Stream Lab, and Documentation in a single connection. It has 27 tools today, and more are added as product teams ship them.
 
-- **Endpoint:** `https://mcp.bitmovin.com` (Streamable HTTP)
-- **Authentication:** an `x-api-key` header carrying a Bitmovin API key. Keys are available from `https://dashboard.bitmovin.com/account`.
+- **Endpoint:** `https://mcp.bitmovin.com`
+- **Authentication:** an `x-api-key` header carrying a Bitmovin API key, available from `https://dashboard.bitmovin.com/account`
+- **Tool namespaces:** `encoding_*`, `player_*`, `observability_*`, `streamlab_*`, and `general_*`, so agents can pick the right tool for a product
 
-The server works with Claude Code, Claude Desktop, Cursor, Windsurf, GitHub Copilot in VS Code, Trae, ChatGPT connectors, OpenAI Codex, Gemini CLI, and other MCP-capable agents. Some clients connect over Streamable HTTP directly; others go through the `mcp-remote` bridge, which requires Node.js v20+. The installed skill and the Bitmovin developer documentation have the exact configuration for each environment.
+The server works with clients that support MCP, either over Streamable HTTP or through the `mcp-remote` bridge, which needs Node.js v20 or later. Supported clients include:
 
-When a client config file is stored inside a project and committed to git, the skill references the key through an environment variable rather than pasting it in. Examples are `.cursor/mcp.json` or `.vscode/mcp.json`.
+- Claude Code and Claude Desktop
+- Cursor, Windsurf, and GitHub Copilot in VS Code
+- Trae and ChatGPT
+- OpenAI Codex, Gemini CLI, and other terminal agents
+
+The installed skill and the Bitmovin documentation have the exact configuration for each environment. Project-level config files such as `.cursor/mcp.json` and `.vscode/mcp.json` are often committed to git. For that reason, the documented configurations reference an environment variable instead of a raw key.
 
 ### Individual product MCP servers
 
-The unified server combines several product servers, which can also be connected one at a time:
+The unified server combines the servers below. Each one can also be connected on its own:
 
-- **Documentation:** `https://agentic.bitmovin.com/documentation/mcp` (no authentication)
-- **Player:** `https://agentic.bitmovin.com/player/mcp` (no authentication)
-- **Encoding:** `https://agentic.bitmovin.com/encoding/mcp` (`x-api-key`)
-- **Observability:** `https://analytics.mcp.bitmovin.com/` (`x-api-key`)
-- **Stream Lab:** `https://streamlab.mcp.bitmovin.com/` (`x-api-key`)
+| Server | Endpoint | Auth |
+|---|---|---|
+| Documentation | `https://agentic.bitmovin.com/documentation/mcp` | None |
+| Player | `https://agentic.bitmovin.com/player/mcp` | None |
+| Encoding | `https://agentic.bitmovin.com/encoding/mcp` | `x-api-key` |
+| Observability | `https://analytics.mcp.bitmovin.com/` | `x-api-key` |
+| Stream Lab | `https://streamlab.mcp.bitmovin.com/` | `x-api-key` |
 
-The Documentation and Player servers are free and need no account, which makes them a way to try Bitmovin without an API key.
+The Documentation and Player servers are free and need no account, which makes them useful for trying things out without an API key.
 
 ## Bitmovin CLI
 
-Bitmovin's official command-line tool is published as `@bitmovin/cli` on npm. It requires Node.js 20+ and is in public beta. The source is at `https://github.com/bitmovin/cli`. The CLI is configured with an API key, plus an optional organization ID, via `bitmovin config set`.
+The official Bitmovin CLI manages video infrastructure from the terminal. It is in Public Beta.
 
-It covers:
+- **Install:** `npm install -g @bitmovin/cli` (needs Node.js 20+)
+- **Repository:** `https://github.com/bitmovin/cli`
+- **Configuration:** `bitmovin config set api-key …` sets the API key. `bitmovin config set organization …` optionally selects an organization.
 
-- **Encoding templates:** create, validate, start, and monitor YAML-based encoding workflows (for example, `bitmovin encoding templates start` with `--watch`).
-- **Encoding jobs:** list, start, stop, and monitor jobs with live progress.
-- **Inputs and outputs:** manage S3, GCS, Azure, and HTTP storage connections.
+**Coverage:**
+
+- **Encoding templates:** create, validate, start, and monitor YAML-based encoding workflows, for example with `bitmovin encoding templates start ./template.yaml --watch`.
+- **Encoding jobs:** list, start, stop, and monitor jobs with live progress, for example with `bitmovin encoding jobs status <id> --watch`.
+- **Inputs and outputs:** S3, GCS, Azure, and HTTP storage connections.
 - **Codec configs:** list and inspect H.264, H.265, AV1, VP9, and audio codec configurations.
-- **Player licenses:** manage license keys and allowed domains.
-- **Observability:** query playback metrics, impressions, and license info.
+- **Player licenses:** license keys and allowed domains.
+- **Observability:** playback metrics, impressions, and license info.
 
-The CLI is meant for scripting, automation, and CI/CD pipelines. The MCP servers are meant for conversational, AI-assisted workflows.
+The CLI is meant for scripting, automation, and CI/CD pipelines. It complements the MCP servers: the CLI handles direct operations, and the MCP servers handle conversational, AI-assisted workflows.
 
 ## SDKs
 
-Official API SDKs for building encoding workflows in code:
+**API SDKs** for building encoding workflows programmatically:
 
 - **JavaScript/TypeScript:** `@bitmovin/api-sdk` (npm)
 - **Python:** `bitmovin-api-sdk` (pip)
@@ -116,34 +168,34 @@ Official API SDKs for building encoding workflows in code:
 
 SDK examples are at `https://github.com/bitmovin/bitmovin-api-sdk-examples`.
 
-Player SDKs:
+**Player SDKs:**
 
 - **Web:** `bitmovin-player` and `bitmovin-player-ui` from npm. The UI source is at `https://github.com/bitmovin/bitmovin-player-ui`.
-- **iOS/tvOS:** Swift Package Manager.
-- **Android:** Maven, via `https://artifacts.bitmovin.com/artifactory/public-releases`.
-- **React Native:** `bitmovin-player-react-native` (`https://github.com/bitmovin/bitmovin-player-react-native`).
-- **Flutter:** `bitmovin-player-flutter` (`https://github.com/bitmovin/bitmovin-player-flutter`).
-- **Roku:** BrightScript.
+- **iOS/tvOS:** Swift Package Manager
+- **Android:** Maven, through `https://artifacts.bitmovin.com/artifactory/public-releases`
+- **React Native:** `bitmovin-player-react-native` (`https://github.com/bitmovin/bitmovin-player-react-native`)
+- **Flutter:** `bitmovin-player-flutter` (`https://github.com/bitmovin/bitmovin-player-flutter`)
+- **Roku:** BrightScript
 
-## Example requests
+## Example prompts
 
-Requests the installed skill handles include:
+With the skill installed, these are typical requests:
 
-- **"Build me a streaming video page":** produces a working web page with the Bitmovin Player, set up for adaptive streaming with HLS/DASH.
-- **"Compare H.264 and AV1 encoding for my content":** explains codec tradeoffs (quality per bit, device compatibility, encoding cost). With the Encoding MCP server connected, it can also set up side-by-side encoding jobs.
-- **"Set up a live stream and show me real-time viewer data":** sets up a Live Encoder workflow with RTMP/SRT ingest, then queries Observability for live session metrics. This needs the Encoding and Observability MCP servers.
+1. **"Build me a streaming video page":** produces a working web page with the Bitmovin Player, set up for adaptive streaming with HLS/DASH.
+2. **"Compare H.264 and AV1 encoding for my content":** covers codec trade-offs, quality per bit, device compatibility, and encoding cost. With the Encoding MCP connected, it can set up side-by-side encoding jobs.
+3. **"Set up a live stream and show me real-time viewer data":** configures a Live Encoder workflow with RTMP/SRT ingest, then queries Observability for live session metrics. This needs the Encoding and Observability MCP servers.
 
 ## Documentation and reference links
 
-- **Developer documentation index:** `https://developer.bitmovin.com/llms.txt` lists all guides, API references, tutorials, and changelog entries.
+- **Developer documentation index:** `https://developer.bitmovin.com/llms.txt`, a full index of guides, API references, tutorials, and changelog entries for encoding, playback, and Observability
 - **Product overview:** `https://bitmovin.com/llms.txt`
 - **Encoding docs:** `https://developer.bitmovin.com/encoding/docs/documentation`
 - **Player/Playback docs:** `https://developer.bitmovin.com/playback/`
-- **AI at Bitmovin:** `https://developer.bitmovin.com/platform/docs/ai-at-bitmovin`
+- **AI at Bitmovin overview:** `https://developer.bitmovin.com/platform/docs/ai-at-bitmovin`
 - **Skill source repository:** `https://github.com/bitmovin/skills`
 
 ## Notes
 
-- Most Bitmovin product APIs need an API key, available after signing up at `https://dashboard.bitmovin.com/account`.
+- Most Bitmovin product APIs need an API key. Signing up at `https://dashboard.bitmovin.com/account` provides one.
 - The Documentation and Player MCP servers are free and need no account.
-- Pricing information is on `https://bitmovin.com` or available from a Bitmovin account team.
+- Pricing is at `https://bitmovin.com` or available from the Bitmovin account team.
